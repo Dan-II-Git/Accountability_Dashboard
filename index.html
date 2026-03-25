@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="South Carolina public school performance data — accountability ratings, academic achievement, and student demographics." />
+  <title>SC School Data | South Carolina Department of Education</title>
+
+  <!-- Google Fonts: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ============================================================
+       Design System
+       ============================================================ */
+    :root {
+      /* SCDE Brand Colors */
+      --color-primary:       #2F3D4C;   /* Primary Dark Blue */
+      --color-primary-light: #43718B;   /* Medium Blue */
+      --color-deep-navy:     #234058;   /* Deep Navy */
+      --color-gold:          #F1BA55;   /* Gold / Accent */
+      --color-accent:        #43718B;   /* Interactive accent (Medium Blue) */
+      --color-accent-light:  #5a8da3;
+      --color-surface:       #ffffff;
+      --color-surface-alt:   #f0f4f8;
+      --color-surface-dark:  #e4ecf4;
+      --color-border:        #ccd9e8;
+      --color-text:          #1a2536;
+      --color-text-sec:      #4a5d74;
+      --color-text-muted:    #7a8fa8;
+      --color-on-dark:       #ffffff;
+      --color-grade-a:       #1a7a4a;
+      --color-grade-b:       #0d6e8a;
+      --color-grade-c:       #b07800;
+      --color-grade-d:       #b05010;
+      --color-grade-f:       #9b1c1c;
+      --max-w:               1280px;
+      --font:                'Poppins', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+      --r-sm: 4px; --r-md: 8px; --r-lg: 12px;
+      --sh-sm: 0 1px 3px rgba(0,30,60,.10);
+      --sh-md: 0 4px 16px rgba(0,30,60,.13);
+      --sh-lg: 0 8px 32px rgba(0,30,60,.16);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--color-surface-alt); color: var(--color-text); line-height: 1.6; min-height: 100vh; }
+
+    /* ── Header ── */
+    .site-header { background: var(--color-primary); color: #fff; position: sticky; top: 0; z-index: 100; box-shadow: var(--sh-md); border-bottom: 3px solid var(--color-gold); }
+    .header-inner { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; height: 64px; display: flex; align-items: center; gap: 16px; }
+    .header-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; cursor: pointer; }
+    .header-logo svg { width: 38px; height: 38px; flex-shrink: 0; }
+    .header-title-main { font-size: 1.05rem; font-weight: 700; line-height: 1.2; }
+    .header-title-sub  { font-size: 0.7rem; opacity: .8; letter-spacing: .04em; text-transform: uppercase; }
+    .header-nav { margin-left: auto; display: flex; gap: 4px; }
+    .header-nav a { color: rgba(255,255,255,.85); text-decoration: none; font-size: .875rem; padding: 4px 10px; border-radius: var(--r-sm); transition: background .15s; }
+    .header-nav a:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+    /* ── Home ── */
+    #view-home { min-height: calc(100vh - 64px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 24px; background: linear-gradient(160deg, var(--color-primary) 0%, var(--color-deep-navy) 50%, var(--color-primary-light) 100%); }
+    .hero-content { text-align: center; color: #fff; max-width: 680px; margin-bottom: 48px; }
+    .hero-badge { display: inline-block; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); border-radius: 20px; padding: 4px 14px; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 16px; }
+    .hero-title { font-size: clamp(1.75rem,5vw,2.75rem); font-weight: 800; line-height: 1.15; margin-bottom: 16px; letter-spacing: -.02em; }
+    .hero-sub { font-size: 1.1rem; opacity: .88; line-height: 1.6; margin-bottom: 32px; }
+    .hero-stats { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
+    .hero-stat-num { font-size: 2rem; font-weight: 800; display: block; }
+    .hero-stat-lbl { font-size: .78rem; opacity: .75; text-transform: uppercase; letter-spacing: .06em; }
+
+    /* ── Search Card ── */
+    .search-card { background: #fff; border-radius: var(--r-lg); box-shadow: var(--sh-lg); padding: 32px; width: 100%; max-width: 640px; }
+    .search-card-title { font-size: 1.05rem; font-weight: 700; color: var(--color-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .form-lbl { display: block; font-size: .82rem; font-weight: 600; color: var(--color-text-sec); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
+    .form-group { margin-bottom: 14px; }
+    .form-select, .form-input {
+      width: 100%; padding: 10px 14px; border: 1px solid var(--color-border); border-radius: var(--r-md);
+      font-family: var(--font); font-size: .95rem; color: var(--color-text); background: #fff;
+      transition: border-color .15s, box-shadow .15s; appearance: none; -webkit-appearance: none;
+    }
+    .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234a5d74' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+    .form-select:focus, .form-input:focus { outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(67,113,139,.15); }
+    .form-input:disabled { background: var(--color-surface-dark); cursor: not-allowed; }
+
+    .school-list { list-style: none; border: 1px solid var(--color-border); border-radius: var(--r-md); max-height: 260px; overflow-y: auto; }
+    .school-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; transition: background .12s; border-bottom: 1px solid var(--color-surface-dark); }
+    .school-item:last-child { border-bottom: none; }
+    .school-item:hover { background: var(--color-surface-alt); }
+    .school-item:focus { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+    .type-badge { font-size: .68rem; padding: 2px 7px; border-radius: 10px; font-weight: 600; letter-spacing: .03em; flex-shrink: 0; }
+    .type-badge.high       { background: #dbeafe; color: #1e40af; }
+    .type-badge.middle     { background: #d1fae5; color: #065f46; }
+    .type-badge.elementary { background: #fef3c7; color: #92400e; }
+    .school-name { flex: 1; font-size: .9rem; }
+    .school-grades-lbl { font-size: .75rem; color: var(--color-text-muted); }
+    .no-schools { padding: 16px; text-align: center; color: var(--color-text-muted); font-size: .9rem; }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 20px; border-radius: var(--r-md); font-size: .9rem; font-weight: 600; font-family: var(--font); cursor: pointer; border: none; transition: background .15s, box-shadow .15s; }
+    .btn-primary { background: var(--color-accent); color: #fff; }
+    .btn-primary:hover { background: var(--color-accent-light); }
+    .btn-outline { background: #fff; color: var(--color-primary); border: 1px solid var(--color-border); width: 100%; justify-content: center; margin-top: 12px; }
+    .btn-outline:hover { background: var(--color-surface-dark); }
+
+    /* ── District / School views ── */
+    #view-district, #view-school { max-width: var(--max-w); margin: 0 auto; padding: 24px 24px 64px; }
+
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: .85rem; color: var(--color-text-sec); margin-bottom: 16px; flex-wrap: wrap; }
+    .breadcrumb a { color: var(--color-accent); text-decoration: none; cursor: pointer; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .bc-sep { color: var(--color-text-muted); }
+    .bc-cur { color: var(--color-text); font-weight: 500; }
+
+    /* ── Big colored header bands ── */
+    .page-header { background: var(--color-primary); color: #fff; border-radius: var(--r-lg); padding: 28px 32px; margin-bottom: 20px; box-shadow: var(--sh-md); display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+    .page-header-info { flex: 1; }
+    .page-header-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.12); border-radius: 20px; padding: 3px 12px; font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 8px; }
+    .page-header-name { font-size: clamp(1.2rem,3vw,1.9rem); font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
+    .page-header-meta { display: flex; gap: 20px; flex-wrap: wrap; font-size: .88rem; opacity: .85; }
+    .page-header-meta span { display: flex; align-items: center; gap: 5px; }
+
+    .grade-circle { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 900; color: #fff; box-shadow: var(--sh-md); border: 3px solid rgba(255,255,255,.3); flex-shrink: 0; }
+    .grade-circle-year { font-size: .72rem; opacity: .8; margin-top: 4px; text-align: center; }
+
+    /* ── Dashboard cards ── */
+    .dash-card { background: #fff; border-radius: var(--r-lg); padding: 28px; margin-bottom: 24px; box-shadow: var(--sh-sm); border: 1px solid var(--color-border); }
+    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid var(--color-surface-alt); }
+    .card-icon { width: 36px; height: 36px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ci-blue   { background: #dbeafe; color: #1e40af; }
+    .ci-teal   { background: #ccf2f5; color: #005c66; }
+    .ci-green  { background: #d1fae5; color: #065f46; }
+    .card-title    { font-size: 1.1rem; font-weight: 700; }
+    .card-subtitle { font-size: .8rem; color: var(--color-text-muted); margin-top: 1px; }
+    .card-controls { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+
+    /* ── Disclaimer ── */
+    .disclaimer { background: #fffbeb; border: 1px solid #fcd34d; border-radius: var(--r-md); padding: 12px 18px; margin-bottom: 20px; font-size: .84rem; color: #78350f; display: flex; gap: 8px; align-items: flex-start; }
+    .disclaimer a { color: inherit; font-weight: 700; }
+
+    /* ── Rating grid ── */
+    .rating-layout { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: start; }
+    .rating-history-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .rh-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 6px; border-radius: var(--r-sm); background: var(--color-surface-alt); font-size: .72rem; }
+    .rh-year  { color: var(--color-text-muted); }
+    .rh-badge { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .82rem; font-weight: 800; color: #fff; }
+    .rh-waived { font-size: .62rem; color: var(--color-text-muted); text-align: center; }
+    .rh-score  { font-size: .65rem; color: var(--color-text-muted); }
+
+    /* ── Tabs ── */
+    .tab-bar { display: flex; gap: 2px; border-bottom: 2px solid var(--color-border); margin-bottom: 18px; overflow-x: auto; scrollbar-width: thin; }
+    .tab-btn { padding: 8px 16px; font-size: .875rem; font-weight: 600; color: var(--color-text-sec); background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -2px; cursor: pointer; white-space: nowrap; transition: color .15s, border-color .15s; font-family: var(--font); }
+    .tab-btn:hover { color: var(--color-accent); }
+    .tab-btn.active { color: var(--color-accent); border-bottom-color: var(--color-accent); }
+
+    /* ── Year selector ── */
+    .year-sel { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .year-sel label { font-size: .82rem; font-weight: 600; color: var(--color-text-sec); }
+    .year-sel select { padding: 5px 28px 5px 10px; border: 1px solid var(--color-border); border-radius: var(--r-sm); font-size: .875rem; font-family: var(--font); color: var(--color-text); background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a5d74' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center; appearance: none; cursor: pointer; }
+
+    /* ── Achievement legend ── */
+    .ach-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; font-size: .8rem; }
+    .leg-item { display: flex; align-items: center; gap: 5px; }
+    .leg-swatch { width: 12px; height: 12px; border-radius: 2px; }
+
+    /* ── Chart wrapper ── */
+    .chart-wrap { width: 100%; position: relative; }
+
+    /* ── Demographics ── */
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .demo-panel { background: var(--color-surface-alt); border-radius: var(--r-md); padding: 20px; border: 1px solid var(--color-border); }
+    .demo-panel-title { font-size: .82rem; font-weight: 700; color: var(--color-text-sec); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 14px; }
+    .enroll-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--color-primary); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: .85rem; font-weight: 700; margin-bottom: 20px; }
+
+    /* Race table */
+    .race-table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+    .race-table tr:not(:last-child) td { border-bottom: 1px solid var(--color-border); }
+    .race-table td { padding: 6px 4px; vertical-align: middle; }
+    .race-table td:first-child { color: var(--color-text-sec); padding-left: 0; }
+    .race-table td:last-child  { text-align: right; font-weight: 700; padding-right: 0; }
+    .bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .bar { height: 8px; border-radius: 4px; min-width: 4px; }
+
+    /* Special populations */
+    .spec-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .spec-item-hdr { display: flex; justify-content: space-between; align-items: baseline; font-size: .84rem; margin-bottom: 3px; }
+    .spec-name  { color: var(--color-text-sec); }
+    .spec-cnt   { font-size: .72rem; color: var(--color-text-muted); }
+    .spec-pct   { font-weight: 700; }
+    .spec-bar-bg { background: var(--color-surface-dark); height: 6px; border-radius: 3px; overflow: hidden; }
+    .spec-bar    { height: 100%; border-radius: 3px; }
+
+    /* ── District school cards ── */
+    .dist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px,1fr)); gap: 18px; margin-bottom: 28px; }
+    .dist-card { background: #fff; border-radius: var(--r-lg); border: 1px solid var(--color-border); padding: 20px; cursor: pointer; transition: box-shadow .15s, transform .1s, border-color .15s; }
+    .dist-card:hover { box-shadow: var(--sh-md); border-color: var(--color-accent); transform: translateY(-2px); }
+    .dist-card:focus { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+    .dc-hdr { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
+    .dc-grade { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 900; color: #fff; flex-shrink: 0; }
+    .dc-name  { font-weight: 700; font-size: .93rem; line-height: 1.3; margin-bottom: 5px; }
+    .dc-meta  { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .dc-grades-lbl { font-size: .75rem; color: var(--color-text-muted); }
+    .dc-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; padding-top: 14px; border-top: 1px solid var(--color-surface-dark); text-align: center; }
+    .dc-stat-val { display: block; font-size: 1.05rem; font-weight: 800; }
+    .dc-stat-lbl { font-size: .68rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .03em; }
+
+    /* ── Footer ── */
+    .site-footer { background: var(--color-primary); color: rgba(255,255,255,.75); padding: 32px 24px; margin-top: 48px; }
+    .footer-inner { max-width: var(--max-w); margin: 0 auto; display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: center; }
+    .footer-brand { font-size: .88rem; line-height: 1.7; }
+    .footer-brand strong { color: #fff; font-size: 1rem; display: block; margin-bottom: 2px; }
+    .footer-links { display: flex; flex-direction: column; gap: 4px; text-align: right; font-size: .82rem; }
+    .footer-links a { color: rgba(255,255,255,.7); text-decoration: none; }
+    .footer-links a:hover { color: #fff; }
+    .footer-copy { max-width: var(--max-w); margin: 14px auto 0; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.15); font-size: .75rem; opacity: .55; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .rating-layout { grid-template-columns: 1fr; }
+      .demo-grid { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; }
+      .footer-links { text-align: left; }
+    }
+    @media (max-width: 640px) {
+      .header-nav { display: none; }
+      #view-district, #view-school { padding: 14px 14px 48px; }
+      .dash-card { padding: 18px; }
+      .page-header { padding: 20px; }
+      .hero-stats { gap: 24px; }
+      .dist-grid { grid-template-columns: 1fr; }
+      .search-card { padding: 20px; }
+    }
+    @media print {
+      .site-header, .site-footer { display: none; }
+      body { background: #fff; }
+      .dash-card { box-shadow: none; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════════════════════════ -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo" onclick="goHome()" tabindex="0" role="link" aria-label="SC School Data home">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="50" cy="50" r="48" fill="#234058" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+        <path d="M 38 22 Q 20 50 38 78 Q 55 60 55 50 Q 55 40 38 22 Z" fill="rgba(255,255,255,.9)"/>
+        <rect x="47" y="56" width="6" height="22" rx="3" fill="rgba(255,255,255,.9)"/>
+        <ellipse cx="50" cy="50" rx="13" ry="9" fill="rgba(255,255,255,.9)" transform="rotate(-30,50,50)"/>
+        <ellipse cx="50" cy="50" rx="13" ry="9" fill="rgba(255,255,255,.9)" transform="rotate(30,50,50)"/>
+        <ellipse cx="50" cy="50" rx="13" ry="9" fill="rgba(255,255,255,.9)" transform="rotate(-80,50,50)"/>
+        <ellipse cx="50" cy="50" rx="13" ry="9" fill="rgba(255,255,255,.9)" transform="rotate(80,50,50)"/>
+        <circle cx="50" cy="50" r="5" fill="rgba(255,255,255,.9)"/>
+      </svg>
+      <div>
+        <div class="header-title-main">SC School Data</div>
+        <div class="header-title-sub">South Carolina Department of Education</div>
+      </div>
+    </div>
+    <nav class="header-nav">
+      <a href="#" onclick="goHome();return false;">Home</a>
+      <a href="https://ed.sc.gov" target="_blank" rel="noopener">SCDE</a>
+      <a href="https://screportcards.com" target="_blank" rel="noopener">Report Card</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ═══ HOME VIEW ════════════════════════════════════════════════ -->
+<section id="view-home">
+  <div class="hero-content">
+    <div class="hero-badge">South Carolina Department of Education</div>
+    <h1 class="hero-title">School Performance Dashboard</h1>
+    <p class="hero-sub">
+      Explore accountability ratings, academic achievement, and student demographics
+      for every public school and district in South Carolina.
+    </p>
+    <p style="font-size:.8rem;opacity:.7;letter-spacing:.06em;text-transform:uppercase;margin-top:-16px;margin-bottom:32px;">Serve Students. Support Teachers. Empower Parents.</p>
+    <div class="hero-stats">
+      <div><span class="hero-stat-num" id="stat-districts">—</span><span class="hero-stat-lbl">Districts</span></div>
+      <div><span class="hero-stat-num" id="stat-schools">—</span><span class="hero-stat-lbl">Schools</span></div>
+      <div><span class="hero-stat-num">6</span><span class="hero-stat-lbl">Years of Data</span></div>
+      <div><span class="hero-stat-num">A–F</span><span class="hero-stat-lbl">Rating Scale</span></div>
+    </div>
+  </div>
+
+  <div class="search-card">
+    <div class="search-card-title">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      Find a School or District
+    </div>
+    <div class="form-group">
+      <label class="form-lbl" for="district-select">School District</label>
+      <select class="form-select" id="district-select" onchange="onDistrictChange(this.value)">
+        <option value="">— Select a district —</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-lbl" for="school-search">Search Schools</label>
+      <input class="form-input" id="school-search" type="search" placeholder="Type to filter schools…" disabled oninput="filterSchools(this.value)" autocomplete="off" />
+    </div>
+    <div id="school-list-container"></div>
+    <button class="btn btn-outline" id="view-dist-btn" style="display:none" onclick="openDistrict(currentDistrictId)">View District Overview</button>
+  </div>
+</section>
+
+<!-- ═══ DISTRICT VIEW ════════════════════════════════════════════ -->
+<section id="view-district" style="display:none">
+  <nav class="breadcrumb" id="dist-breadcrumb"></nav>
+  <div class="page-header" id="dist-header">
+    <div class="page-header-info">
+      <div class="page-header-badge">School District</div>
+      <h2 class="page-header-name" id="dist-name"></h2>
+      <div class="page-header-meta" id="dist-meta"></div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span><strong>Note:</strong> Data shown is representative sample data modeled after SCDE Report Card structure. For official data, visit <a href="https://screportcards.com" target="_blank" rel="noopener">screportcards.com</a>.</span>
+  </div>
+
+  <div class="dash-card">
+    <div class="card-header">
+      <div class="card-icon ci-teal"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div><div class="card-title">Accountability Rating Trends</div><div class="card-subtitle">Composite score (0–100) across all schools, 2018–2024</div></div>
+    </div>
+    <div class="chart-wrap" style="height:300px"><canvas id="chart-dist-trend"></canvas></div>
+  </div>
+
+  <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:14px">Schools — click to view full dashboard</h3>
+  <div class="dist-grid" id="dist-school-cards"></div>
+</section>
+
+<!-- ═══ SCHOOL VIEW ════════════════════════════════════════════════ -->
+<section id="view-school" style="display:none">
+  <nav class="breadcrumb" id="school-breadcrumb"></nav>
+
+  <div class="page-header">
+    <div class="page-header-info">
+      <div class="page-header-badge" id="school-type-badge">School</div>
+      <h2 class="page-header-name" id="school-name"></h2>
+      <div class="page-header-meta" id="school-meta"></div>
+    </div>
+    <div style="text-align:center">
+      <div class="grade-circle" id="school-grade-circle">—</div>
+      <div class="grade-circle-year" id="school-grade-year"></div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span><strong>Note:</strong> Sample data modeled after SCDE Report Card. For official data, visit <a href="https://screportcards.com" target="_blank" rel="noopener">screportcards.com</a>.</span>
+  </div>
+
+  <!-- 1. Accountability -->
+  <div class="dash-card">
+    <div class="card-header">
+      <div class="card-icon ci-blue"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div><div class="card-title">Accountability Ratings</div><div class="card-subtitle">SC Report Card A–F ratings, 2018–2024 (2020 waived)</div></div>
+    </div>
+    <div class="rating-layout">
+      <div>
+        <div style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-muted);margin-bottom:8px">Year-by-Year Ratings</div>
+        <div class="rating-history-grid" id="rating-hist-grid"></div>
+      </div>
+      <div class="chart-wrap" style="height:270px"><canvas id="chart-accountability"></canvas></div>
+    </div>
+  </div>
+
+  <!-- 2. Achievement -->
+  <div class="dash-card">
+    <div class="card-header">
+      <div class="card-icon ci-teal"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+      <div><div class="card-title">Academic Achievement</div><div class="card-subtitle">Performance levels by subject and grade level</div></div>
+      <div class="card-controls">
+        <div class="year-sel">
+          <label for="ach-year">Year:</label>
+          <select id="ach-year" onchange="onAchYearChange(this.value)">
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024" selected>2024</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="tab-bar" id="ach-tabs"></div>
+    <div class="ach-legend">
+      <div class="leg-item"><div class="leg-swatch" style="background:#2F3D4C"></div><span>Exceeds</span></div>
+      <div class="leg-item"><div class="leg-swatch" style="background:#43718B"></div><span>Meets</span></div>
+      <div class="leg-item"><div class="leg-swatch" style="background:#d97706"></div><span>Basic</span></div>
+      <div class="leg-item"><div class="leg-swatch" style="background:#b91c1c"></div><span>Below Basic</span></div>
+    </div>
+    <div class="chart-wrap" style="height:300px"><canvas id="chart-achievement"></canvas></div>
+  </div>
+
+  <!-- 3. Demographics -->
+  <div class="dash-card">
+    <div class="card-header">
+      <div class="card-icon ci-green"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div><div class="card-title">Student Demographics</div><div class="card-subtitle">Enrollment composition and special populations (2024)</div></div>
+    </div>
+    <div id="enroll-info"></div>
+    <div class="demo-grid">
+      <section aria-labelledby="race-title">
+        <h3 class="demo-panel-title" id="race-title" style="font-size:.82rem;font-weight:700;color:var(--color-text-sec);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px">Race / Ethnicity</h3>
+        <div class="chart-wrap" style="height:240px"><canvas id="chart-race"></canvas></div>
+        <table class="race-table" style="margin-top:12px"><tbody id="race-tbody"></tbody></table>
+      </section>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <section class="demo-panel" aria-labelledby="gender-title">
+          <div class="demo-panel-title" id="gender-title">Gender</div>
+          <div class="chart-wrap" style="height:170px"><canvas id="chart-gender"></canvas></div>
+        </section>
+        <section class="demo-panel" aria-labelledby="spec-title">
+          <div class="demo-panel-title" id="spec-title">Special Populations</div>
+          <ul class="spec-list" id="spec-pop-list"></ul>
+        </section>
+      </div>
+    </div>
+  </div>
+
+</section>
+</main>
+
+<!-- ═══ FOOTER ════════════════════════════════════════════════════ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <strong>South Carolina Department of Education</strong>
+      Serve Students. Support Teachers. Empower Parents.<br>
+      Public school performance data for South Carolina.
+    </div>
+    <div class="footer-links">
+      <a href="https://ed.sc.gov" target="_blank" rel="noopener">SC Department of Education</a>
+      <a href="https://screportcards.com" target="_blank" rel="noopener">SC Report Card</a>
+      <a href="https://nces.ed.gov" target="_blank" rel="noopener">NCES National Data</a>
+    </div>
+  </div>
+  <div class="footer-copy">
+    Data shown is representative sample data for demonstration purposes.
+    For official accountability data, visit screportcards.com.
+    &copy; 2025 South Carolina Department of Education.
+  </div>
+</footer>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+const RATING_COLORS = { A:'#1a7a4a', B:'#0d6e8a', C:'#b07800', D:'#b05010', F:'#9b1c1c' };
+const BAND_COLORS = { exceeds:'#2F3D4C', meets:'#43718B', basic:'#d97706', belowBasic:'#b91c1c' };
+const RACE_COLORS = ['#2F3D4C','#43718B','#2ca05a','#8b44ac','#c0392b','#d97706','#5d6d7e'];
+const TYPE_LABELS = { high:'High School', middle:'Middle School', elementary:'Elementary School' };
+
+// ─── Districts ───────────────────────────────────────────────
+const DISTRICTS = [
+  { id:"0101", name:"Abbeville County School District", county:"Abbeville", schools:[
+    {id:"0101001",name:"Abbeville High School",grades:"9-12",type:"high"},
+    {id:"0101002",name:"Wright Middle School",grades:"6-8",type:"middle"},
+    {id:"0101003",name:"Central Elementary School",grades:"K-5",type:"elementary"},
+    {id:"0101004",name:"Diamond Hill Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"0701", name:"Anderson School District Five",county:"Anderson",schools:[
+    {id:"0701001",name:"Anderson High School",grades:"9-12",type:"high"},
+    {id:"0701002",name:"Westside High School",grades:"9-12",type:"high"},
+    {id:"0701003",name:"McCants Middle School",grades:"6-8",type:"middle"},
+    {id:"0701004",name:"Glenview Middle School",grades:"6-8",type:"middle"},
+    {id:"0701005",name:"Nevitt Forest Elementary",grades:"K-5",type:"elementary"},
+    {id:"0701006",name:"New Prospect Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"0702", name:"Beaufort County School District",county:"Beaufort",schools:[
+    {id:"0702001",name:"Beaufort High School",grades:"9-12",type:"high"},
+    {id:"0702002",name:"Hilton Head Island High School",grades:"9-12",type:"high"},
+    {id:"0702003",name:"Beaufort Middle School",grades:"6-8",type:"middle"},
+    {id:"0702004",name:"Hilton Head Island Middle School",grades:"6-8",type:"middle"},
+    {id:"0702005",name:"Mossy Oaks Elementary",grades:"K-5",type:"elementary"},
+    {id:"0702006",name:"Bluffton Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"1001", name:"Berkeley County School District",county:"Berkeley",schools:[
+    {id:"1001001",name:"Goose Creek High School",grades:"9-12",type:"high"},
+    {id:"1001002",name:"Stratford High School",grades:"9-12",type:"high"},
+    {id:"1001003",name:"Hanahan High School",grades:"9-12",type:"high"},
+    {id:"1001004",name:"Cane Bay Middle School",grades:"6-8",type:"middle"},
+    {id:"1001005",name:"Foxbank Elementary",grades:"K-5",type:"elementary"},
+    {id:"1001006",name:"Sangaree Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"1201", name:"Charleston County School District",county:"Charleston",schools:[
+    {id:"1201001",name:"Academic Magnet High School",grades:"9-12",type:"high"},
+    {id:"1201002",name:"West Ashley High School",grades:"9-12",type:"high"},
+    {id:"1201003",name:"Burke High School",grades:"9-12",type:"high"},
+    {id:"1201004",name:"James Island Charter High School",grades:"9-12",type:"high"},
+    {id:"1201005",name:"Moultrie Middle School",grades:"6-8",type:"middle"},
+    {id:"1201006",name:"Rivers Middle School",grades:"6-8",type:"middle"},
+    {id:"1201007",name:"Mitchell Elementary School",grades:"K-5",type:"elementary"},
+    {id:"1201008",name:"James Simons Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"1301", name:"Cherokee County School District",county:"Cherokee",schools:[
+    {id:"1301001",name:"Gaffney High School",grades:"9-12",type:"high"},
+    {id:"1301002",name:"Gaffney Middle School",grades:"6-8",type:"middle"},
+    {id:"1301003",name:"Limestone Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"1801", name:"Darlington County School District",county:"Darlington",schools:[
+    {id:"1801001",name:"Darlington High School",grades:"9-12",type:"high"},
+    {id:"1801002",name:"Mayo High School for Math/Science",grades:"9-12",type:"high"},
+    {id:"1801003",name:"Darlington Middle School",grades:"6-8",type:"middle"},
+    {id:"1801004",name:"W.H. Jones Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"2001", name:"Dorchester School District Two",county:"Dorchester",schools:[
+    {id:"2001001",name:"Summerville High School",grades:"9-12",type:"high"},
+    {id:"2001002",name:"Ashley Ridge High School",grades:"9-12",type:"high"},
+    {id:"2001003",name:"Oakbrook Middle School",grades:"6-8",type:"middle"},
+    {id:"2001004",name:"Sand Hill Elementary",grades:"K-5",type:"elementary"},
+    {id:"2001005",name:"Fort Dorchester Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"2301", name:"Florence School District One",county:"Florence",schools:[
+    {id:"2301001",name:"Wilson High School",grades:"9-12",type:"high"},
+    {id:"2301002",name:"South Florence High School",grades:"9-12",type:"high"},
+    {id:"2301003",name:"Southside Middle School",grades:"6-8",type:"middle"},
+    {id:"2301004",name:"Moore Intermediate",grades:"3-5",type:"elementary"},
+    {id:"2301005",name:"Savannah Grove Elementary",grades:"K-2",type:"elementary"}]},
+  { id:"2501", name:"Greenville County Schools",county:"Greenville",schools:[
+    {id:"2501001",name:"J.L. Mann High School",grades:"9-12",type:"high"},
+    {id:"2501002",name:"Greenville Senior High School",grades:"9-12",type:"high"},
+    {id:"2501003",name:"Mauldin High School",grades:"9-12",type:"high"},
+    {id:"2501004",name:"Woodmont High School",grades:"9-12",type:"high"},
+    {id:"2501005",name:"Hughes Middle School",grades:"6-8",type:"middle"},
+    {id:"2501006",name:"Tanglewood Middle School",grades:"6-8",type:"middle"},
+    {id:"2501007",name:"Augusta Circle Elementary",grades:"K-5",type:"elementary"},
+    {id:"2501008",name:"Sara Collins Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"2601", name:"Greenwood School District 50",county:"Greenwood",schools:[
+    {id:"2601001",name:"Greenwood High School",grades:"9-12",type:"high"},
+    {id:"2601002",name:"Brewer Middle School",grades:"6-8",type:"middle"},
+    {id:"2601003",name:"Mathews Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"2801", name:"Horry County Schools",county:"Horry",schools:[
+    {id:"2801001",name:"Conway High School",grades:"9-12",type:"high"},
+    {id:"2801002",name:"Myrtle Beach High School",grades:"9-12",type:"high"},
+    {id:"2801003",name:"North Myrtle Beach High School",grades:"9-12",type:"high"},
+    {id:"2801004",name:"Carolina Forest High School",grades:"9-12",type:"high"},
+    {id:"2801005",name:"Conway Middle School",grades:"6-8",type:"middle"},
+    {id:"2801006",name:"Myrtle Beach Middle School",grades:"6-8",type:"middle"},
+    {id:"2801007",name:"Ocean Bay Elementary",grades:"K-5",type:"elementary"},
+    {id:"2801008",name:"Palmetto Bays Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"3001", name:"Kershaw County School District",county:"Kershaw",schools:[
+    {id:"3001001",name:"Camden High School",grades:"9-12",type:"high"},
+    {id:"3001002",name:"Lugoff-Elgin High School",grades:"9-12",type:"high"},
+    {id:"3001003",name:"Camden Middle School",grades:"6-8",type:"middle"},
+    {id:"3001004",name:"Doby's Mill Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"3401", name:"Lexington School District One",county:"Lexington",schools:[
+    {id:"3401001",name:"Lexington High School",grades:"9-12",type:"high"},
+    {id:"3401002",name:"River Bluff High School",grades:"9-12",type:"high"},
+    {id:"3401003",name:"Lexington Middle School",grades:"6-8",type:"middle"},
+    {id:"3401004",name:"Carolina Springs Middle School",grades:"6-8",type:"middle"},
+    {id:"3401005",name:"Forts Pond Elementary",grades:"K-5",type:"elementary"},
+    {id:"3401006",name:"Meadow Glen Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"3402", name:"Lexington School District Two",county:"Lexington",schools:[
+    {id:"3402001",name:"Airport High School",grades:"9-12",type:"high"},
+    {id:"3402002",name:"Airport Middle School",grades:"6-8",type:"middle"},
+    {id:"3402003",name:"Cayce Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"4001", name:"Orangeburg Consolidated School District",county:"Orangeburg",schools:[
+    {id:"4001001",name:"Orangeburg-Wilkinson High School",grades:"9-12",type:"high"},
+    {id:"4001002",name:"Branchville High School",grades:"9-12",type:"high"},
+    {id:"4001003",name:"Orangeburg Middle School",grades:"6-8",type:"middle"},
+    {id:"4001004",name:"Sheridan Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"4101", name:"Pickens County School District",county:"Pickens",schools:[
+    {id:"4101001",name:"Easley High School",grades:"9-12",type:"high"},
+    {id:"4101002",name:"Pickens High School",grades:"9-12",type:"high"},
+    {id:"4101003",name:"Gettys Middle School",grades:"6-8",type:"middle"},
+    {id:"4101004",name:"East End Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"4201", name:"Richland School District One",county:"Richland",schools:[
+    {id:"4201001",name:"A.C. Flora High School",grades:"9-12",type:"high"},
+    {id:"4201002",name:"Dreher High School",grades:"9-12",type:"high"},
+    {id:"4201003",name:"C.A. Johnson High School",grades:"9-12",type:"high"},
+    {id:"4201004",name:"Hand Middle School",grades:"6-8",type:"middle"},
+    {id:"4201005",name:"Crayton Middle School",grades:"6-8",type:"middle"},
+    {id:"4201006",name:"Forest Lake Elementary",grades:"K-5",type:"elementary"},
+    {id:"4201007",name:"Watkins-Nance Elementary",grades:"K-5",type:"elementary"},
+    {id:"4201008",name:"Olympia Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"4202", name:"Richland School District Two",county:"Richland",schools:[
+    {id:"4202001",name:"Spring Valley High School",grades:"9-12",type:"high"},
+    {id:"4202002",name:"Westwood High School",grades:"9-12",type:"high"},
+    {id:"4202003",name:"Summit Parkway Middle School",grades:"6-8",type:"middle"},
+    {id:"4202004",name:"Hopkins Middle School",grades:"6-8",type:"middle"},
+    {id:"4202005",name:"Rice Creek Elementary",grades:"K-5",type:"elementary"},
+    {id:"4202006",name:"Langford Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"4406", name:"Spartanburg School District Six",county:"Spartanburg",schools:[
+    {id:"4406001",name:"Dorman High School",grades:"9-12",type:"high"},
+    {id:"4406002",name:"Westview Middle School",grades:"6-8",type:"middle"},
+    {id:"4406003",name:"Westview Elementary",grades:"K-5",type:"elementary"},
+    {id:"4406004",name:"Fairforest Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"4407", name:"Spartanburg School District Seven",county:"Spartanburg",schools:[
+    {id:"4407001",name:"Spartanburg High School",grades:"9-12",type:"high"},
+    {id:"4407002",name:"Carver Middle School",grades:"6-8",type:"middle"},
+    {id:"4407003",name:"Pine Street Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"4501", name:"Sumter School District",county:"Sumter",schools:[
+    {id:"4501001",name:"Sumter High School",grades:"9-12",type:"high"},
+    {id:"4501002",name:"Crestwood High School",grades:"9-12",type:"high"},
+    {id:"4501003",name:"Wilson Hall Middle School",grades:"6-8",type:"middle"},
+    {id:"4501004",name:"Bates Middle School",grades:"6-8",type:"middle"},
+    {id:"4501005",name:"Alice Drive Elementary",grades:"K-5",type:"elementary"},
+    {id:"4501006",name:"Millwood Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"4803", name:"Fort Mill School District",county:"York",schools:[
+    {id:"4803001",name:"Fort Mill High School",grades:"9-12",type:"high"},
+    {id:"4803002",name:"Nation Ford High School",grades:"9-12",type:"high"},
+    {id:"4803003",name:"Fort Mill Middle School",grades:"6-8",type:"middle"},
+    {id:"4803004",name:"Banks Trail Middle School",grades:"6-8",type:"middle"},
+    {id:"4803005",name:"Pleasant Knoll Elementary",grades:"K-5",type:"elementary"},
+    {id:"4803006",name:"Riverview Elementary",grades:"K-5",type:"elementary"}]},
+  { id:"4804", name:"Rock Hill Schools",county:"York",schools:[
+    {id:"4804001",name:"Rock Hill High School",grades:"9-12",type:"high"},
+    {id:"4804002",name:"Northwestern High School",grades:"9-12",type:"high"},
+    {id:"4804003",name:"South Pointe High School",grades:"9-12",type:"high"},
+    {id:"4804004",name:"Rawlinson Road Middle School",grades:"6-8",type:"middle"},
+    {id:"4804005",name:"Sullivan Middle School",grades:"6-8",type:"middle"},
+    {id:"4804006",name:"Ebenezer Avenue Elementary",grades:"K-5",type:"elementary"},
+    {id:"4804007",name:"Northside Elementary",grades:"K-5",type:"elementary"}]}
+];
+
+// ─── Data generators ─────────────────────────────────────────────
+function rng(n) { return Math.abs((Math.imul(n, 1664525) + 1013904223) | 0); }
+function rng2(n){ return Math.abs((Math.imul(n, 22695477) + 1) | 0); }
+
+function genRatings(seed) {
+  const grades = ['F','D','C','C','B','B','A','A','A'];
+  const cats   = { A:'Excellent', B:'Meets Expectations', C:'Average', D:'Below Average', F:'Unsatisfactory' };
+  const ranges = { A:[80,100], B:[65,79], C:[50,64], D:[35,49], F:[0,34] };
+  let r = rng(seed);
+  const si = r % 9;
+  const years = [2018,2019,2021,2022,2023,2024];
+  return years.map((year, i) => {
+    r = rng(r + i + seed);
+    const offset = (r % 3) - 1;
+    const idx = Math.max(0, Math.min(8, si + (i > 2 ? offset : 0)));
+    const letter = grades[idx];
+    r = rng(r);
+    const [lo, hi] = ranges[letter];
+    const score = parseFloat((lo + (r % (hi - lo + 1))).toFixed(1));
+    return { year, rating: letter, score, category: cats[letter] };
+  });
+}
+
+// Achievement bands
+function achBands(sid, gradeOrCourse, year, subject) {
+  const hash = (sid + gradeOrCourse + year + subject).split('').reduce((a,c)=>(a*31+c.charCodeAt(0))|0, 0);
+  let h = rng(Math.abs(hash));
+  const meets     = Math.max(5, Math.min(85, 35 + (h % 25) - 12));
+  h = rng(h);
+  const exceeds   = Math.max(5, Math.min(85, 20 + (h % 17) - 8));
+  h = rng(h);
+  const belowBasic= Math.max(5, Math.min(85, 20 + (h % 21) - 10));
+  const basic     = Math.max(3, 100 - meets - exceeds - belowBasic);
+  return { belowBasic, basic, meets, exceeds };
+}
+
+function makeDemographics(sid, type) {
+  let h = sid.split('').reduce((a,c)=>(a*31+c.charCodeAt(0))|0, 0);
+  h = rng(Math.abs(h));
+  const baseEnr = type==='high' ? 1200 : type==='middle' ? 700 : 450;
+  const enroll  = Math.max(150, baseEnr + (h % 400) - 200);
+  h = rng(h); const white = 15 + (h % 50);
+  h = rng(h); const black = 15 + (h % 50);
+  h = rng(h); const hisp  = 5  + (h % 30);
+  h = rng(h); const asian = 1  + (h % 15);
+  h = rng(h); const amInd = 1  + (h % 4);
+  const two  = Math.max(2, 100 - white - black - hisp - asian - amInd);
+  const tot  = white + black + hisp + asian + amInd + two;
+  const sc   = v => parseFloat(((v/tot)*100).toFixed(1));
+  h = rng(h); const swd  = 10 + (h % 12);
+  h = rng(h); const el   = 2  + (h % 18);
+  h = rng(h); const ed   = 25 + (h % 45);
+  h = rng(h); const hm   = 1  + (h % 6);
+  h = rng(h); const mil  = 1  + (h % 8);
+  const cnt = p => Math.round(enroll * p / 100);
+  return {
+    enrollment: enroll,
+    raceEthnicity: [
+      { key:'white',    label:'White',                     pct: sc(white) },
+      { key:'black',    label:'Black / African American',  pct: sc(black) },
+      { key:'hispanic', label:'Hispanic / Latino',         pct: sc(hisp)  },
+      { key:'asian',    label:'Asian',                     pct: sc(asian) },
+      { key:'amInd',    label:'American Indian / Alaska Native', pct: sc(amInd) },
+      { key:'two',      label:'Two or More Races',         pct: sc(two)   }
+    ],
+    gender: [
+      { label:'Male',   pct: 49 + (rng(h) % 5) },
+      { label:'Female', pct: 51 - (rng(h) % 5) }
+    ],
+    specialPopulations: [
+      { label:'Students with Disabilities',  pct: swd, count: cnt(swd) },
+      { label:'English Learners',            pct: el,  count: cnt(el)  },
+      { label:'Economically Disadvantaged',  pct: ed,  count: cnt(ed)  },
+      { label:'Homeless Students',           pct: hm,  count: cnt(hm)  },
+      { label:'Military Connected',          pct: mil, count: cnt(mil) }
+    ]
+  };
+}
+
+// Pre-compute data caches
+const ACCT  = {};
+const ACHV  = {};
+const DEMO  = {};
+let _seed = 42;
+DISTRICTS.forEach(d => d.schools.forEach(s => {
+  _seed = rng(_seed);
+  ACCT[s.id] = genRatings(_seed);
+
+  const isHigh = s.type === 'high';
+  const years  = [2022,2023,2024];
+  if (isHigh) {
+    const courses = ['English 1','Algebra 1','Biology 1','US History'];
+    const byCourse = {};
+    courses.forEach(c => { byCourse[c] = years.map(y => ({ year:y, ...achBands(s.id,c,y,'EOCEP') })); });
+    ACHV[s.id] = { type:'high', EOCEP:{ courses, byCourse } };
+  } else {
+    const elaGrades = s.type==='middle' ? [6,7,8] : [3,4,5];
+    const sciGrades = s.type==='middle' ? [6,8]   : [4];
+    const mk = (subj, grades) => {
+      const byGrade = {};
+      grades.forEach(g => { byGrade[g] = years.map(y => ({ year:y, ...achBands(s.id,g,y,subj) })); });
+      return { years, byGrade };
+    };
+    ACHV[s.id] = { type: s.type, ELA: mk('ELA',elaGrades), Math: mk('Math',elaGrades), Science: mk('Science',sciGrades) };
+  }
+  DEMO[s.id] = makeDemographics(s.id, s.type);
+}));
+
+// ============================================================
+// APP STATE
+// ============================================================
+let currentDistrictId = null;
+let currentSchoolId   = null;
+let currentSubject    = null;
+let currentYear       = 2024;
+const chartInst       = {};
+
+function destroyChart(id) {
+  if (chartInst[id]) { chartInst[id].destroy(); delete chartInst[id]; }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function goHome() {
+  document.getElementById('view-home').style.display   = 'flex';
+  document.getElementById('view-district').style.display = 'none';
+  document.getElementById('view-school').style.display   = 'none';
+  currentDistrictId = null;
+  currentSchoolId   = null;
+  document.getElementById('district-select').value = '';
+  document.getElementById('school-search').disabled = true;
+  document.getElementById('school-search').value    = '';
+  document.getElementById('school-list-container').innerHTML = '';
+  document.getElementById('view-dist-btn').style.display = 'none';
+}
+
+function openDistrict(districtId) {
+  currentDistrictId = districtId;
+  document.getElementById('view-home').style.display    = 'none';
+  document.getElementById('view-school').style.display   = 'none';
+  document.getElementById('view-district').style.display = 'block';
+  renderDistrictView(districtId);
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function openSchool(districtId, schoolId) {
+  currentDistrictId = districtId;
+  currentSchoolId   = schoolId;
+  document.getElementById('view-home').style.display    = 'none';
+  document.getElementById('view-district').style.display = 'none';
+  document.getElementById('view-school').style.display   = 'block';
+  renderSchoolView(districtId, schoolId);
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+// ============================================================
+// HOME
+// ============================================================
+function initHome() {
+  const sel = document.getElementById('district-select');
+  const sorted = [...DISTRICTS].sort((a,b) => a.name.localeCompare(b.name));
+  sel.innerHTML = '<option value="">— Select a district —</option>' +
+    sorted.map(d => `<option value="${d.id}">${d.name} (${d.county} Co.)</option>`).join('');
+
+  const total = DISTRICTS.reduce((n,d) => n + d.schools.length, 0);
+  document.getElementById('stat-districts').textContent = DISTRICTS.length;
+  document.getElementById('stat-schools').textContent   = total.toLocaleString();
+}
+
+function onDistrictChange(districtId) {
+  currentDistrictId = districtId;
+  const input = document.getElementById('school-search');
+  const btn   = document.getElementById('view-dist-btn');
+  if (!districtId) {
+    input.disabled = true;
+    input.value    = '';
+    document.getElementById('school-list-container').innerHTML = '';
+    btn.style.display = 'none';
+    return;
+  }
+  input.disabled = false;
+  input.value    = '';
+  btn.style.display = 'block';
+  renderSchoolListItems('');
+}
+
+function filterSchools(q) {
+  renderSchoolListItems(q);
+}
+
+function renderSchoolListItems(q) {
+  const d = DISTRICTS.find(d => d.id === currentDistrictId);
+  if (!d) return;
+  const lq = q.trim().toLowerCase();
+  const filtered = lq ? d.schools.filter(s => s.name.toLowerCase().includes(lq)) : d.schools;
+  const c = document.getElementById('school-list-container');
+  if (!filtered.length) { c.innerHTML = '<div class="no-schools">No schools match.</div>'; return; }
+  c.innerHTML = `<ul class="school-list">` + filtered.map(s => `
+    <li class="school-item" tabindex="0"
+        onclick="openSchool('${d.id}','${s.id}')"
+        onkeydown="if(event.key==='Enter')openSchool('${d.id}','${s.id}')">
+      <span class="type-badge ${s.type}">${TYPE_LABELS[s.type]}</span>
+      <span class="school-name">${s.name}</span>
+      <span class="school-grades-lbl">Grades ${s.grades}</span>
+    </li>`).join('') + `</ul>`;
+}
+
+// ============================================================
+// DISTRICT VIEW
+// ============================================================
+function renderDistrictView(districtId) {
+  const d = DISTRICTS.find(x => x.id === districtId);
+  if (!d) return;
+
+  document.getElementById('dist-breadcrumb').innerHTML =
+    `<a onclick="goHome()">Home</a><span class="bc-sep">›</span><span class="bc-cur">${d.name}</span>`;
+  document.getElementById('dist-name').textContent = d.name;
+  document.getElementById('dist-meta').innerHTML =
+    `<span>${d.county} County</span><span>${d.schools.length} Schools</span>`;
+
+  // School cards
+  document.getElementById('dist-school-cards').innerHTML = d.schools.map(s => {
+    const ratings = ACCT[s.id];
+    const latest  = ratings ? ratings[ratings.length - 1] : null;
+    const demo    = DEMO[s.id];
+    const color   = latest ? (RATING_COLORS[latest.rating] || '#999') : '#999';
+    return `<div class="dist-card" tabindex="0"
+               onclick="openSchool('${d.id}','${s.id}')"
+               onkeydown="if(event.key==='Enter')openSchool('${d.id}','${s.id}')">
+      <div class="dc-hdr">
+        <div class="dc-grade" style="background:${color}">${latest ? latest.rating : '—'}</div>
+        <div>
+          <div class="dc-name">${s.name}</div>
+          <div class="dc-meta">
+            <span class="type-badge ${s.type}">${TYPE_LABELS[s.type]}</span>
+            <span class="dc-grades-lbl">Grades ${s.grades}</span>
+          </div>
+        </div>
+      </div>
+      ${latest ? `<div class="dc-stats">
+        <div class="dsc-stat"><span class="dc-stat-val">${latest.score}</span><span class="dc-stat-lbl">Score</span></div>
+        <div class="dsc-stat"><span class="dc-stat-val">${demo ? demo.enrollment.toLocaleString() : '—'}</span><span class="dc-stat-lbl">Enrolled</span></div>
+        <div class="dsc-stat"><span class="dc-stat-val" style="color:${color}">${latest.rating}</span><span class="dc-stat-lbl">${latest.category}</span></div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+
+  // Trend chart
+  setTimeout(() => renderDistrictTrend(d), 100);
+}
+
+function renderDistrictTrend(d) {
+  const ctx = document.getElementById('chart-dist-trend');
+  if (!ctx) return;
+  destroyChart('dist-trend');
+  const colors = ['#2F3D4C','#43718B','#2ca05a','#8b44ac','#c0392b','#d97706','#5d6d7e','#1e40af'];
+  const years  = ['2018','2019','2021','2022','2023','2024'];
+  const datasets = d.schools.slice(0,8).map((s,i) => {
+    const ratings = ACCT[s.id];
+    if (!ratings) return null;
+    const rm = {};
+    ratings.forEach(r => { rm[r.year] = r.score; });
+    return {
+      label: s.name,
+      data: years.map(y => rm[parseInt(y)] ?? null),
+      borderColor: colors[i % colors.length],
+      backgroundColor: 'transparent',
+      borderWidth: 2, tension: 0.3, pointRadius: 4, spanGaps: false
+    };
+  }).filter(Boolean);
+
+  chartInst['dist-trend'] = new Chart(ctx, {
+    type: 'line',
+    data: { labels: years, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position:'bottom', labels:{ font:{size:11}, usePointStyle:true, padding:10, boxWidth:10 }},
+        tooltip: { backgroundColor:'#1a2536', padding:10,
+          callbacks:{ title:i=>`School Year ${i[0].label}`, label:i=>` ${i.dataset.label}: ${i.raw} pts` }}
+      },
+      scales: {
+        y: { min:0, max:100, grid:{color:'rgba(0,0,0,.06)'}, ticks:{ callback:v=>v+' pts', font:{size:11} }},
+        x: { grid:{display:false}, ticks:{font:{size:12}} }
+      }
+    }
+  });
+}
+
+// ============================================================
+// SCHOOL VIEW
+// ============================================================
+function renderSchoolView(districtId, schoolId) {
+  const d = DISTRICTS.find(x => x.id === districtId);
+  const s = d ? d.schools.find(x => x.id === schoolId) : null;
+  if (!d || !s) return;
+
+  const ratings = ACCT[s.id];
+  const latest  = ratings ? ratings[ratings.length - 1] : null;
+  const color   = latest ? (RATING_COLORS[latest.rating] || '#2F3D4C') : '#2F3D4C';
+
+  // Breadcrumb
+  document.getElementById('school-breadcrumb').innerHTML =
+    `<a onclick="goHome()">Home</a>
+     <span class="bc-sep">›</span>
+     <a onclick="openDistrict('${d.id}')">${d.name}</a>
+     <span class="bc-sep">›</span>
+     <span class="bc-cur">${s.name}</span>`;
+
+  // Header
+  document.getElementById('school-type-badge').textContent = TYPE_LABELS[s.type] || 'School';
+  document.getElementById('school-name').textContent = s.name;
+  document.getElementById('school-meta').innerHTML =
+    `<span>${d.name}</span><span>${d.county} County</span><span>Grades ${s.grades}</span>`;
+
+  const circle = document.getElementById('school-grade-circle');
+  circle.textContent = latest ? latest.rating : '—';
+  circle.style.background = color;
+  document.getElementById('school-grade-year').textContent = latest ? `${latest.year} Rating` : '';
+
+  // Dashboards
+  currentYear = 2024;
+  setTimeout(() => renderAccountability(s.id), 50);
+  renderAchievementTabs(s);
+  setTimeout(() => renderDemographics(s.id), 50);
+}
+
+// ─── Accountability ───────────────────────────────────────────
+function renderAccountability(schoolId) {
+  const ratings = ACCT[schoolId];
+  if (!ratings) return;
+
+  // History grid
+  const allYears = [2018,2019,2020,2021,2022,2023,2024];
+  const rm = {};
+  ratings.forEach(r => { rm[r.year] = r; });
+  document.getElementById('rating-hist-grid').innerHTML = allYears.map(yr => {
+    if (yr === 2020) return `<div class="rh-item"><span class="rh-year">${yr}</span><span class="rh-waived">Waived</span><span class="rh-waived">COVID-19</span></div>`;
+    const r = rm[yr];
+    if (!r) return `<div class="rh-item"><span class="rh-year">${yr}</span><span class="rh-waived">—</span></div>`;
+    return `<div class="rh-item" title="${r.category} — Score: ${r.score}">
+      <span class="rh-year">${yr}</span>
+      <div class="rh-badge" style="background:${RATING_COLORS[r.rating]}">${r.rating}</div>
+      <span class="rh-score">${r.score}</span>
+    </div>`;
+  }).join('');
+
+  // Trend chart
+  const ctx = document.getElementById('chart-accountability');
+  if (!ctx) return;
+  destroyChart('acct');
+  const years  = ratings.map(r => r.year.toString());
+  const scores = ratings.map(r => r.score);
+  const colors = ratings.map(r => RATING_COLORS[r.rating] || '#999');
+
+  chartInst['acct'] = new Chart(ctx, {
+    type: 'line',
+    data: { labels: years, datasets: [{
+      label: 'Rating Score',
+      data: scores,
+      borderColor: '#43718B', borderWidth: 2.5,
+      backgroundColor: 'rgba(67,113,139,.08)', fill: true,
+      tension: 0.35, pointRadius: 8, pointHoverRadius: 10,
+      pointBackgroundColor: colors, pointBorderColor: '#fff', pointBorderWidth: 2
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a2536', padding: 12,
+          callbacks: {
+            title: i => `School Year ${i[0].label}`,
+            label: i => { const r = ratings[i.dataIndex]; return [`  Score: ${r.score}`, `  Rating: ${r.rating} — ${r.category}`]; }
+          }
+        }
+      },
+      scales: {
+        y: { min:0, max:100, grid:{color:'rgba(0,0,0,.06)'}, ticks:{callback:v=>v+' pts'}, title:{display:true,text:'Composite Score (0–100)',color:'#4a5d74',font:{size:11}} },
+        x: { grid:{display:false} }
+      }
+    }
+  });
+}
+
+// ─── Achievement ──────────────────────────────────────────────
+function renderAchievementTabs(school) {
+  const data  = ACHV[school.id];
+  const tabs  = document.getElementById('ach-tabs');
+  if (!data) { tabs.innerHTML = ''; return; }
+
+  const tabDefs = school.type === 'high'
+    ? [{ id:'EOCEP', label:'EOCEP (End-of-Course)' }]
+    : [
+        { id:'ELA',     label:'ELA — SC READY' },
+        { id:'Math',    label:'Math — SC READY' },
+        { id:'Science', label:'Science — SC PASS' }
+      ];
+
+  currentSubject = tabDefs[0].id;
+
+  tabs.innerHTML = tabDefs.map((t,i) =>
+    `<button class="tab-btn ${i===0?'active':''}" onclick="selectSubject(this,'${t.id}')">${t.label}</button>`
+  ).join('');
+
+  setTimeout(() => renderAchievementChart(school.id), 50);
+}
+
+function selectSubject(btn, subject) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentSubject = subject;
+  renderAchievementChart(currentSchoolId);
+}
+
+function onAchYearChange(yr) {
+  currentYear = parseInt(yr);
+  renderAchievementChart(currentSchoolId);
+}
+
+function renderAchievementChart(schoolId) {
+  const data = ACHV[schoolId];
+  if (!data) return;
+  const ctx = document.getElementById('chart-achievement');
+  if (!ctx) return;
+  destroyChart('ach');
+
+  const barOpts = (xLabel) => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position:'top', labels:{ font:{size:12}, usePointStyle:true, padding:14, boxWidth:10 }},
+      tooltip: { backgroundColor:'#1a2536', padding:10, callbacks:{ label: i=>` ${i.dataset.label}: ${i.raw}%` }}
+    },
+    scales: {
+      x: { grid:{display:false}, ticks:{font:{size:12}}, title:{display:true,text:xLabel,color:'#4a5d74',font:{size:11}} },
+      y: { min:0, max:100, grid:{color:'rgba(0,0,0,.06)'}, ticks:{callback:v=>v+'%'}, title:{display:true,text:'% of Students',color:'#4a5d74',font:{size:11}} }
+    }
+  });
+
+  const mkDatasets = (getVal, labels) => [
+    { label:'Exceeds',     data: labels.map(k=>getVal(k,'exceeds')),    backgroundColor: BAND_COLORS.exceeds    },
+    { label:'Meets',       data: labels.map(k=>getVal(k,'meets')),      backgroundColor: BAND_COLORS.meets      },
+    { label:'Basic',       data: labels.map(k=>getVal(k,'basic')),      backgroundColor: BAND_COLORS.basic      },
+    { label:'Below Basic', data: labels.map(k=>getVal(k,'belowBasic')), backgroundColor: BAND_COLORS.belowBasic }
+  ];
+
+  if (data.type === 'high') {
+    const eocep   = data.EOCEP;
+    const courses = eocep.courses;
+    const getVal  = (course, band) => (eocep.byCourse[course]?.find(e=>e.year===currentYear)?.[band] ?? 0);
+    chartInst['ach'] = new Chart(ctx, { type:'bar', data:{ labels:courses, datasets:mkDatasets(getVal,courses) }, options:barOpts('Course') });
+  } else {
+    const subj    = data[currentSubject];
+    if (!subj) return;
+    const grades  = Object.keys(subj.byGrade).sort((a,b)=>a-b);
+    const getVal  = (g, band) => (subj.byGrade[g]?.find(e=>e.year===currentYear)?.[band] ?? 0);
+    const labels  = grades.map(g => `Grade ${g}`);
+    chartInst['ach'] = new Chart(ctx, { type:'bar', data:{ labels, datasets:mkDatasets(getVal,grades) }, options:barOpts('Grade Level') });
+  }
+}
+
+// ─── Demographics ────────────────────────────────────────────
+function renderDemographics(schoolId) {
+  const d = DEMO[schoolId];
+  if (!d) return;
+
+  // Enrollment
+  document.getElementById('enroll-info').innerHTML =
+    `<div class="enroll-badge">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      ${d.enrollment.toLocaleString()} Students Enrolled (2024)
+    </div>`;
+
+  // Race table
+  document.getElementById('race-tbody').innerHTML = d.raceEthnicity.map((r,i) => `
+    <tr>
+      <td>${r.label}</td>
+      <td><div class="bar-wrap"><div class="bar" style="width:${Math.round(r.pct*2)}px;max-width:110px;background:${RACE_COLORS[i%RACE_COLORS.length]}"></div><span style="font-size:.75rem;color:var(--color-text-muted)">${r.pct}%</span></div></td>
+      <td>${Math.round(d.enrollment * r.pct / 100).toLocaleString()}</td>
+    </tr>`).join('');
+
+  // Race chart
+  const rCtx = document.getElementById('chart-race');
+  destroyChart('race');
+  chartInst['race'] = new Chart(rCtx, {
+    type: 'doughnut',
+    data: {
+      labels: d.raceEthnicity.map(r=>r.label),
+      datasets: [{ data: d.raceEthnicity.map(r=>r.pct), backgroundColor: RACE_COLORS.slice(0,d.raceEthnicity.length), borderColor:'#fff', borderWidth:2, hoverOffset:8 }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, cutout:'55%',
+      plugins: {
+        legend: { position:'bottom', labels:{ font:{size:11}, usePointStyle:true, padding:10, boxWidth:10,
+          generateLabels: chart => chart.data.labels.map((l,i) => ({
+            text:`${l}: ${chart.data.datasets[0].data[i]}%`,
+            fillStyle: chart.data.datasets[0].backgroundColor[i],
+            strokeStyle:'#fff', lineWidth:1, pointStyle:'circle'
+          }))
+        }},
+        tooltip: { backgroundColor:'#1a2536', padding:10, callbacks:{ label: i=>` ${i.label}: ${i.raw}%` }}
+      }
+    }
+  });
+
+  // Gender chart
+  const gCtx = document.getElementById('chart-gender');
+  destroyChart('gender');
+  chartInst['gender'] = new Chart(gCtx, {
+    type: 'doughnut',
+    data: {
+      labels: d.gender.map(g=>g.label),
+      datasets: [{ data: d.gender.map(g=>g.pct), backgroundColor:['#2F3D4C','#c0392b'], borderColor:'#fff', borderWidth:2, hoverOffset:6 }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, cutout:'60%',
+      plugins: {
+        legend: { position:'bottom', labels:{ font:{size:12}, usePointStyle:true, padding:12, boxWidth:10,
+          generateLabels: chart => chart.data.labels.map((l,i) => ({
+            text:`${l}: ${chart.data.datasets[0].data[i]}%`,
+            fillStyle: chart.data.datasets[0].backgroundColor[i],
+            strokeStyle:'#fff', lineWidth:1, pointStyle:'circle'
+          }))
+        }},
+        tooltip: { backgroundColor:'#1a2536', padding:10, callbacks:{ label: i=>` ${i.label}: ${i.raw}%` }}
+      }
+    }
+  });
+
+  // Special populations
+  document.getElementById('spec-pop-list').innerHTML = d.specialPopulations.map(p => {
+    const barColor = p.pct >= 50 ? '#b91c1c' : p.pct >= 30 ? '#d97706' : p.pct >= 15 ? '#43718B' : '#2F3D4C';
+    return `<li>
+      <div class="spec-item-hdr">
+        <span class="spec-name">${p.label}</span>
+        <div style="display:flex;gap:8px;align-items:baseline">
+          <span class="spec-cnt">${p.count.toLocaleString()} students</span>
+          <span class="spec-pct">${p.pct}%</span>
+        </div>
+      </div>
+      <div class="spec-bar-bg"><div class="spec-bar" style="width:${Math.min(p.pct,100)}%;background:${barColor}"></div></div>
+    </li>`;
+  }).join('');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', initHome);
+</script>
+</body>
+</html>
