@@ -1,15 +1,16 @@
 // ============================================================
 // SC School Dashboard — Chart rendering with Chart.js
+// Data is passed as parameters (fetched from API in app.js)
 // ============================================================
 
-import { ACCOUNTABILITY, ACHIEVEMENT, DEMOGRAPHICS } from '../data/data.js';
-
 export const RATING_COLORS = {
-  A: '#1a7a4a',
-  B: '#0d6e8a',
-  C: '#b07800',
-  D: '#b05010',
-  F: '#9b1c1c'
+  'Excellent':      '#1a7a4a',
+  'Good':           '#0d6e8a',
+  'Average':        '#b07800',
+  'Below Average':  '#b05010',
+  'Unsatisfactory': '#9b1c1c',
+  'Not Rated':      '#9ca3af',
+  '—':              '#9ca3af'
 };
 
 const BAND_COLORS = {
@@ -24,10 +25,8 @@ const RACE_COLORS = [
   '#8b44ac', '#c0392b', '#d97706', '#5d6d7e'
 ];
 
-const GENDER_COLORS = ['#003366', '#c0392b'];
-const SPEC_POP_COLOR = '#007a8a';
+const GENDER_COLORS  = ['#003366', '#c0392b'];
 
-// Keep track of chart instances so we can destroy before re-rendering
 const chartInstances = {};
 
 function destroyChart(id) {
@@ -38,19 +37,17 @@ function destroyChart(id) {
 }
 
 // ─── Accountability Trend Chart ───────────────────────────────────────────────
-export function renderAccountabilityChart(schoolId) {
-  const data = ACCOUNTABILITY[schoolId];
-  if (!data) return;
+// ratingsData: [{ year, score, overall: { rate, short, color } }]
+export function renderAccountabilityChart(ratingsData) {
+  if (!ratingsData?.length) return;
 
   const ctx = document.getElementById('chart-accountability');
   if (!ctx) return;
-
   destroyChart('accountability');
 
-  const years = data.ratings.map(r => r.year.toString());
-  const scores = data.ratings.map(r => r.score);
-  const ratings = data.ratings.map(r => r.rating);
-  const colors = ratings.map(r => RATING_COLORS[r] || '#999');
+  const years  = ratingsData.map(r => r.year.toString());
+  const scores = ratingsData.map(r => r.score);
+  const colors = ratingsData.map(r => r.overall?.color || '#9ca3af');
 
   chartInstances['accountability'] = new Chart(ctx, {
     type: 'line',
@@ -69,6 +66,7 @@ export function renderAccountabilityChart(schoolId) {
         pointBackgroundColor: colors,
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
+        spanGaps: false
       }]
     },
     options: {
@@ -80,33 +78,16 @@ export function renderAccountabilityChart(schoolId) {
           callbacks: {
             title: items => `School Year ${items[0].label}`,
             label: item => {
-              const r = data.ratings[item.dataIndex];
-              return [`  Score: ${r.score}`, `  Rating: ${r.rating} — ${r.category}`];
+              const r = ratingsData[item.dataIndex];
+              return [
+                `  Score: ${r.score ?? 'N/A'}`,
+                `  Rating: ${r.overall?.rate || 'Not Rated'}`
+              ];
             }
           },
           backgroundColor: '#1a2536',
           padding: 12,
           bodyFont: { size: 13 }
-        },
-        annotation: {
-          annotations: {
-            covidLine: {
-              type: 'line',
-              xMin: '2019',
-              xMax: '2021',
-              borderColor: 'rgba(180,0,0,0.25)',
-              borderWidth: 1,
-              borderDash: [5, 5],
-              label: {
-                content: '2020 Waived (COVID-19)',
-                enabled: true,
-                position: 'center',
-                color: '#9b1c1c',
-                font: { size: 11 },
-                backgroundColor: 'rgba(255,255,255,0.85)'
-              }
-            }
-          }
         }
       },
       scales: {
@@ -133,55 +114,44 @@ export function renderAccountabilityChart(schoolId) {
     }
   });
 
-  // Render the history grid
-  renderRatingHistoryGrid(data.ratings);
+  renderRatingHistoryGrid(ratingsData);
 }
 
 function renderRatingHistoryGrid(ratings) {
-  const grid = document.getElementById('rating-history-grid');
+  const grid = document.getElementById('rating-hist-grid');
   if (!grid) return;
 
-  // Add 2020 as waived year marker
-  const allYears = [2018, 2019, 2020, 2021, 2022, 2023, 2024];
+  const allYears = [2022, 2023, 2024, 2025];
   const ratingMap = {};
   ratings.forEach(r => { ratingMap[r.year] = r; });
 
   grid.innerHTML = allYears.map(yr => {
-    if (yr === 2020) {
-      return `<div class="rating-history-item">
-        <span class="rating-history-year">${yr}</span>
-        <span class="rating-waived">Waived</span>
-        <span style="font-size:0.65rem;color:var(--color-text-muted)">COVID-19</span>
-      </div>`;
-    }
     const r = ratingMap[yr];
     if (!r) return `<div class="rating-history-item">
       <span class="rating-history-year">${yr}</span>
       <span class="rating-waived">—</span>
     </div>`;
-    return `<div class="rating-history-item" title="${r.category} — Score: ${r.score}">
+    return `<div class="rating-history-item" title="${r.overall?.rate || ''} — Score: ${r.score ?? '—'}">
       <span class="rating-history-year">${yr}</span>
-      <div class="rating-history-badge" style="background:${RATING_COLORS[r.rating]}">${r.rating}</div>
-      <span style="font-size:0.68rem;color:var(--color-text-muted)">${r.score}</span>
+      <div class="rating-history-badge" style="background:${r.overall?.color || '#9ca3af'}">${r.overall?.label || '—'}</div>
+      <span style="font-size:0.68rem;color:var(--color-text-muted)">${r.score ?? '—'}</span>
     </div>`;
   }).join('');
 }
 
 // ─── Achievement Chart ────────────────────────────────────────────────────────
-export function renderAchievementChart(schoolId, subject, year) {
-  const data = ACHIEVEMENT[schoolId];
-  if (!data) return;
+// achievementData: API response from /api/schools/:id/achievement
+export function renderAchievementChart(achievementData, subject, year) {
+  if (!achievementData) return;
 
   const ctx = document.getElementById('chart-achievement');
   if (!ctx) return;
-
   destroyChart('achievement');
 
-  const isHigh = data.type === 'high';
+  const isHigh = achievementData.type === 'high';
 
   if (isHigh) {
-    // EOCEP: x-axis = courses
-    const eocep = data.EOCEP;
+    const eocep = achievementData.EOCEP;
     if (!eocep) return;
 
     const yearData = {};
@@ -196,20 +166,23 @@ export function renderAchievementChart(schoolId, subject, year) {
       data: {
         labels,
         datasets: [
-          { label: 'Exceeds',     data: labels.map(c => yearData[c]?.exceeds    ?? 0), backgroundColor: BAND_COLORS.exceeds },
-          { label: 'Meets',       data: labels.map(c => yearData[c]?.meets      ?? 0), backgroundColor: BAND_COLORS.meets },
-          { label: 'Basic',       data: labels.map(c => yearData[c]?.basic      ?? 0), backgroundColor: BAND_COLORS.basic },
-          { label: 'Below Basic', data: labels.map(c => yearData[c]?.belowBasic ?? 0), backgroundColor: BAND_COLORS.belowBasic }
+          { label: 'A — Exceeds Expectations',        data: labels.map(c => yearData[c]?.exceeds    ?? 0), backgroundColor: BAND_COLORS.exceeds },
+          { label: 'B & C — Meets Expectations',     data: labels.map(c => yearData[c]?.meets      ?? 0), backgroundColor: BAND_COLORS.meets },
+          { label: 'D — Minimally Meets Expectations', data: labels.map(c => yearData[c]?.basic    ?? 0), backgroundColor: BAND_COLORS.basic },
+          { label: 'F — Does Not Meet Expectations', data: labels.map(c => yearData[c]?.belowBasic ?? 0), backgroundColor: BAND_COLORS.belowBasic }
         ]
       },
       options: barChartOptions('Course', '% of Students')
     });
+
   } else {
-    // Elementary/Middle: x-axis = grade, bars = performance levels
-    const subjectData = data[subject];
+    const subjectData = achievementData[subject];
     if (!subjectData) return;
 
-    const grades = Object.keys(subjectData.byGrade).sort((a, b) => a - b);
+    const grades = Object.keys(subjectData.byGrade)
+      .filter(g => g !== 'ALL')
+      .sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
+
     const gradeData = {};
     grades.forEach(g => {
       const entry = subjectData.byGrade[g]?.find(e => e.year === year);
@@ -222,10 +195,10 @@ export function renderAchievementChart(schoolId, subject, year) {
       data: {
         labels,
         datasets: [
-          { label: 'Exceeds',     data: grades.map(g => gradeData[g]?.exceeds    ?? 0), backgroundColor: BAND_COLORS.exceeds },
-          { label: 'Meets',       data: grades.map(g => gradeData[g]?.meets      ?? 0), backgroundColor: BAND_COLORS.meets },
-          { label: 'Basic',       data: grades.map(g => gradeData[g]?.basic      ?? 0), backgroundColor: BAND_COLORS.basic },
-          { label: 'Below Basic', data: grades.map(g => gradeData[g]?.belowBasic ?? 0), backgroundColor: BAND_COLORS.belowBasic }
+          { label: 'Exceeding',        data: grades.map(g => gradeData[g]?.exceeds    ?? 0), backgroundColor: BAND_COLORS.exceeds },
+          { label: 'Meets',            data: grades.map(g => gradeData[g]?.meets      ?? 0), backgroundColor: BAND_COLORS.meets },
+          { label: 'Approaching',      data: grades.map(g => gradeData[g]?.basic      ?? 0), backgroundColor: BAND_COLORS.basic },
+          { label: 'In Need of Support', data: grades.map(g => gradeData[g]?.belowBasic ?? 0), backgroundColor: BAND_COLORS.belowBasic }
         ]
       },
       options: barChartOptions('Grade Level', '% of Students')
@@ -248,9 +221,7 @@ function barChartOptions(xLabel, yLabel) {
         }
       },
       tooltip: {
-        callbacks: {
-          label: item => ` ${item.dataset.label}: ${item.raw}%`
-        },
+        callbacks: { label: item => ` ${item.dataset.label}: ${item.raw != null ? item.raw + '%' : 'N/A'}` },
         backgroundColor: '#1a2536',
         padding: 10
       }
@@ -275,13 +246,12 @@ function barChartOptions(xLabel, yLabel) {
 }
 
 // ─── Demographics Charts ──────────────────────────────────────────────────────
-export function renderDemographicsCharts(schoolId) {
-  const data = DEMOGRAPHICS[schoolId];
-  if (!data) return;
-
-  renderRaceChart(data);
-  renderGenderChart(data);
-  renderSpecialPopulations(data);
+// demographicsData: API response from /api/schools/:id/demographics
+export function renderDemographicsCharts(demographicsData) {
+  if (!demographicsData) return;
+  renderRaceChart(demographicsData);
+  renderGenderChart(demographicsData);
+  renderSpecialPopulations(demographicsData);
 }
 
 function renderRaceChart(data) {
@@ -289,7 +259,9 @@ function renderRaceChart(data) {
   if (!ctx) return;
   destroyChart('race');
 
-  const races = Object.values(data.raceEthnicity);
+  const races  = Object.values(data.raceEthnicity || {});
+  if (!races.length) return;
+
   const labels = races.map(r => r.label);
   const values = races.map(r => r.pct);
 
@@ -330,9 +302,7 @@ function renderRaceChart(data) {
           }
         },
         tooltip: {
-          callbacks: {
-            label: item => ` ${item.label}: ${item.raw}%`
-          },
+          callbacks: { label: item => ` ${item.label}: ${item.raw}%` },
           backgroundColor: '#1a2536',
           padding: 10
         }
@@ -346,8 +316,9 @@ function renderGenderChart(data) {
   if (!ctx) return;
   destroyChart('gender');
 
-  const male   = data.gender.male.pct;
-  const female = data.gender.female.pct;
+  const male   = data.gender?.male?.pct;
+  const female = data.gender?.female?.pct;
+  if (male == null && female == null) return;
 
   chartInstances['gender'] = new Chart(ctx, {
     type: 'doughnut',
@@ -375,7 +346,7 @@ function renderGenderChart(data) {
             generateLabels: chart => {
               const d = chart.data;
               return d.labels.map((l, i) => ({
-                text: `${l}: ${d.datasets[0].data[i]}%`,
+                text: `${l}: ${d.datasets[0].data[i] ?? '—'}%`,
                 fillStyle: d.datasets[0].backgroundColor[i],
                 strokeStyle: '#fff',
                 lineWidth: 1,
@@ -398,18 +369,23 @@ function renderSpecialPopulations(data) {
   const container = document.getElementById('spec-pop-list');
   if (!container) return;
 
-  const pops = Object.values(data.specialPopulations);
+  const pops = Object.values(data.specialPopulations || {});
+  if (!pops.length) {
+    container.innerHTML = '<li style="color:var(--color-text-muted);font-size:.85rem">No data available.</li>';
+    return;
+  }
+
   container.innerHTML = pops.map(p => `
     <li class="spec-pop-item">
       <div class="spec-pop-header">
         <span class="spec-pop-name">${p.label}</span>
         <div style="display:flex;gap:8px;align-items:baseline">
-          <span class="spec-pop-count">${p.count.toLocaleString()} students</span>
-          <span class="spec-pop-pct">${p.pct}%</span>
+          <span class="spec-pop-count">${p.count?.toLocaleString() ?? '—'} students</span>
+          <span class="spec-pop-pct">${p.pct ?? '—'}%</span>
         </div>
       </div>
       <div class="spec-pop-bar-bg">
-        <div class="spec-pop-bar" style="width:${Math.min(p.pct, 100)}%;background:${getSpecPopColor(p.pct)}"></div>
+        <div class="spec-pop-bar" style="width:${Math.min(p.pct ?? 0, 100)}%;background:${getSpecPopColor(p.pct ?? 0)}"></div>
       </div>
     </li>
   `).join('');
@@ -422,31 +398,32 @@ function getSpecPopColor(pct) {
   return '#003366';
 }
 
-// ─── Trend comparison chart (district view) ───────────────────────────────────
-export function renderDistrictTrendChart(districtSchools) {
-  const ctx = document.getElementById('chart-district-trend');
+// ─── District Trend Chart ─────────────────────────────────────────────────────
+// trendData: [{ school_id, school_name, school_type, ratings: [{ year, score }] }]
+export function renderDistrictTrendChart(trendData) {
+  const ctx = document.getElementById('chart-dist-trend');
   if (!ctx) return;
   destroyChart('district-trend');
 
-  const colors = ['#003366','#007a8a','#2ca05a','#8b44ac','#c0392b','#d97706','#5d6d7e','#1e40af'];
-  const years = ['2018','2019','2021','2022','2023','2024'];
+  if (!trendData?.length) return;
 
-  const datasets = districtSchools.slice(0, 8).map((school, i) => {
-    const acct = ACCOUNTABILITY[school.id];
-    if (!acct) return null;
+  const colors = ['#003366','#007a8a','#2ca05a','#8b44ac','#c0392b','#d97706','#5d6d7e','#1e40af'];
+  const years  = ['2022','2023','2024','2025'];
+
+  const datasets = trendData.slice(0, 8).map((school, i) => {
     const ratingMap = {};
-    acct.ratings.forEach(r => { ratingMap[r.year] = r.score; });
+    school.ratings.forEach(r => { ratingMap[r.year] = r.score; });
     return {
-      label: school.name,
-      data: years.map(y => ratingMap[parseInt(y)] ?? null),
-      borderColor: colors[i % colors.length],
+      label:           school.school_name,
+      data:            years.map(y => ratingMap[parseInt(y)] ?? null),
+      borderColor:     colors[i % colors.length],
       backgroundColor: 'transparent',
-      borderWidth: 2,
-      tension: 0.3,
-      pointRadius: 4,
-      spanGaps: false
+      borderWidth:     2,
+      tension:         0.3,
+      pointRadius:     4,
+      spanGaps:        false
     };
-  }).filter(Boolean);
+  });
 
   chartInstances['district-trend'] = new Chart(ctx, {
     type: 'line',
@@ -462,7 +439,7 @@ export function renderDistrictTrendChart(districtSchools) {
         tooltip: {
           callbacks: {
             title: items => `School Year ${items[0].label}`,
-            label: item => ` ${item.dataset.label}: ${item.raw} pts`
+            label: item => ` ${item.dataset.label}: ${item.raw != null ? item.raw + ' pts' : 'N/A'}`
           },
           backgroundColor: '#1a2536',
           padding: 10
@@ -474,6 +451,115 @@ export function renderDistrictTrendChart(districtSchools) {
           max: 100,
           grid: { color: 'rgba(0,0,0,0.06)' },
           ticks: { callback: v => v + ' pts', font: { size: 11 } }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 12 } }
+        }
+      }
+    }
+  });
+}
+
+// ─── Classroom / Teacher Workforce Chart ─────────────────────────────────────
+// data: [{ year, avg_salary, pct_return_1yr, pct_return_3yr, teacher_count }]
+export function renderClassroomChart(data, canvasId = 'chart-classroom') {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx || !data?.length) return;
+  destroyChart(canvasId);
+
+  const years      = data.map(d => d.year);
+  const salaries   = data.map(d => d.avg_salary   ?? null);
+  const ret1yr     = data.map(d => d.pct_return_1yr ?? null);
+  const ret3yr     = data.map(d => d.pct_return_3yr ?? null);
+
+  const fmtSalary = v => v != null ? `$${Math.round(v).toLocaleString()}` : 'N/A';
+  const fmtPct    = v => v != null ? `${v.toFixed(1)}%` : 'N/A';
+
+  chartInstances[canvasId] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: years,
+      datasets: [
+        {
+          label: 'Avg Teacher Salary',
+          data: salaries,
+          borderColor: '#1a7a4a',
+          backgroundColor: 'rgba(26,122,74,0.08)',
+          tension: 0.3,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          yAxisID: 'ySalary',
+          spanGaps: true
+        },
+        {
+          label: '1-Year Retention',
+          data: ret1yr,
+          borderColor: '#0d6e8a',
+          backgroundColor: 'rgba(13,110,138,0.08)',
+          tension: 0.3,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          yAxisID: 'yPct',
+          spanGaps: true
+        },
+        {
+          label: '3-Year Retention',
+          data: ret3yr,
+          borderColor: '#b07800',
+          backgroundColor: 'rgba(176,120,0,0.08)',
+          borderDash: [5, 4],
+          tension: 0.3,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          yAxisID: 'yPct',
+          spanGaps: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { font: { size: 13 }, padding: 16 }
+        },
+        tooltip: {
+          backgroundColor: '#1a2536',
+          padding: 10,
+          callbacks: {
+            label: item => {
+              const v = item.raw;
+              if (item.dataset.yAxisID === 'ySalary') return ` ${item.dataset.label}: ${fmtSalary(v)}`;
+              return ` ${item.dataset.label}: ${fmtPct(v)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        ySalary: {
+          type: 'linear',
+          position: 'left',
+          title: { display: true, text: 'Average Salary', font: { size: 12 } },
+          ticks: {
+            callback: v => `$${(v / 1000).toFixed(0)}k`,
+            font: { size: 12 }
+          },
+          grid: { color: 'rgba(0,0,0,0.06)' }
+        },
+        yPct: {
+          type: 'linear',
+          position: 'right',
+          min: 0,
+          max: 100,
+          title: { display: true, text: 'Retention Rate (%)', font: { size: 12 } },
+          ticks: {
+            callback: v => `${v}%`,
+            font: { size: 12 }
+          },
+          grid: { display: false }
         },
         x: {
           grid: { display: false },

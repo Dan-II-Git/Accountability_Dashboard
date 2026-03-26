@@ -122,7 +122,7 @@
     .page-header-meta { display: flex; gap: 20px; flex-wrap: wrap; font-size: .88rem; opacity: .85; }
     .page-header-meta span { display: flex; align-items: center; gap: 5px; }
 
-    .grade-circle { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 900; color: #fff; box-shadow: var(--sh-md); border: 3px solid rgba(255,255,255,.3); flex-shrink: 0; }
+    .grade-circle { min-width: 72px; height: auto; padding: 10px 18px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 900; color: #fff; box-shadow: var(--sh-md); border: 3px solid rgba(255,255,255,.3); flex-shrink: 0; white-space: nowrap; }
     .grade-circle-year { font-size: .72rem; opacity: .8; margin-top: 4px; text-align: center; }
 
     /* ── Dashboard cards ── */
@@ -198,7 +198,7 @@
     .dist-card:hover { box-shadow: var(--sh-md); border-color: var(--color-accent); transform: translateY(-2px); }
     .dist-card:focus { outline: 2px solid var(--color-accent); outline-offset: 2px; }
     .dc-hdr { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
-    .dc-grade { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 900; color: #fff; flex-shrink: 0; }
+    .dc-grade { min-width: 42px; height: auto; padding: 5px 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; color: #fff; flex-shrink: 0; white-space: nowrap; }
     .dc-name  { font-weight: 700; font-size: .93rem; line-height: 1.3; margin-bottom: 5px; }
     .dc-meta  { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .dc-grades-lbl { font-size: .75rem; color: var(--color-text-muted); }
@@ -283,8 +283,8 @@
     <div class="hero-stats">
       <div><span class="hero-stat-num" id="stat-districts">—</span><span class="hero-stat-lbl">Districts</span></div>
       <div><span class="hero-stat-num" id="stat-schools">—</span><span class="hero-stat-lbl">Schools</span></div>
-      <div><span class="hero-stat-num">6</span><span class="hero-stat-lbl">Years of Data</span></div>
-      <div><span class="hero-stat-num">A–F</span><span class="hero-stat-lbl">Rating Scale</span></div>
+      <div><span class="hero-stat-num">4</span><span class="hero-stat-lbl">Years of Ratings</span></div>
+      <div><span class="hero-stat-num" style="font-size:clamp(.85rem,2vw,1.1rem);letter-spacing:-.01em">Excellent–Unsatisfactory</span><span class="hero-stat-lbl">Rating Scale</span></div>
     </div>
   </div>
 
@@ -304,7 +304,7 @@
       <input class="form-input" id="school-search" type="search" placeholder="Type to filter schools…" disabled oninput="filterSchools(this.value)" autocomplete="off" />
     </div>
     <div id="school-list-container"></div>
-    <button class="btn btn-outline" id="view-dist-btn" style="display:none" onclick="openDistrict(currentDistrictId)">View District Overview</button>
+    <button class="btn btn-outline" id="view-dist-btn" style="display:none" onclick="app.openCurrentDistrict()">View District Overview</button>
   </div>
 </section>
 
@@ -321,15 +321,23 @@
 
   <div class="disclaimer">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <span><strong>Note:</strong> Data shown is representative sample data modeled after SCDE Report Card structure. For official data, visit <a href="https://screportcards.com" target="_blank" rel="noopener">screportcards.com</a>.</span>
+    <span><strong>Source:</strong> SC Department of Education Report Card data (2021–2025). For the official interactive report card, visit <a href="https://screportcards.com" target="_blank" rel="noopener">screportcards.com</a>.</span>
   </div>
 
   <div class="dash-card">
     <div class="card-header">
       <div class="card-icon ci-teal"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-      <div><div class="card-title">Accountability Rating Trends</div><div class="card-subtitle">Composite score (0–100) across all schools, 2018–2024</div></div>
+      <div><div class="card-title">Accountability Rating Trends</div><div class="card-subtitle">Composite score (0–100) across all schools, 2021–2025</div></div>
     </div>
     <div class="chart-wrap" style="height:300px"><canvas id="chart-dist-trend"></canvas></div>
+  </div>
+
+  <div class="dash-card" id="dist-classroom-card">
+    <div class="card-header">
+      <div class="card-icon ci-blue"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div><div class="card-title">Teacher Workforce</div><div class="card-subtitle">District-wide average salary and retention rates (2021–2025)</div></div>
+    </div>
+    <div class="chart-wrap" style="height:300px"><canvas id="chart-dist-classroom"></canvas></div>
   </div>
 
   <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:14px">Schools — click to view full dashboard</h3>
@@ -354,14 +362,14 @@
 
   <div class="disclaimer">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <span><strong>Note:</strong> Sample data modeled after SCDE Report Card. For official data, visit <a href="https://screportcards.com" target="_blank" rel="noopener">screportcards.com</a>.</span>
+    <span><strong>Source:</strong> SC Department of Education Report Card data (2021–2025). For the official interactive report card, visit <a href="https://screportcards.com" target="_blank" rel="noopener">screportcards.com</a>.</span>
   </div>
 
   <!-- 1. Accountability -->
   <div class="dash-card">
     <div class="card-header">
       <div class="card-icon ci-blue"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-      <div><div class="card-title">Accountability Ratings</div><div class="card-subtitle">SC Report Card A–F ratings, 2018–2024 (2020 waived)</div></div>
+      <div><div class="card-title">Accountability Ratings</div><div class="card-subtitle">SC Report Card ratings (Excellent–Unsatisfactory), 2021–2025</div></div>
     </div>
     <div class="rating-layout">
       <div>
@@ -389,12 +397,7 @@
       </div>
     </div>
     <div class="tab-bar" id="ach-tabs"></div>
-    <div class="ach-legend">
-      <div class="leg-item"><div class="leg-swatch" style="background:#2F3D4C"></div><span>Exceeds</span></div>
-      <div class="leg-item"><div class="leg-swatch" style="background:#43718B"></div><span>Meets</span></div>
-      <div class="leg-item"><div class="leg-swatch" style="background:#d97706"></div><span>Basic</span></div>
-      <div class="leg-item"><div class="leg-swatch" style="background:#b91c1c"></div><span>Below Basic</span></div>
-    </div>
+
     <div class="chart-wrap" style="height:300px"><canvas id="chart-achievement"></canvas></div>
   </div>
 
@@ -424,6 +427,15 @@
     </div>
   </div>
 
+  <!-- 4. Teacher Workforce -->
+  <div class="dash-card" id="classroom-card">
+    <div class="card-header">
+      <div class="card-icon ci-blue"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+      <div><div class="card-title">Teacher Workforce</div><div class="card-subtitle">Average salary and retention rates (2021–2025)</div></div>
+    </div>
+    <div class="chart-wrap" style="height:300px"><canvas id="chart-classroom"></canvas></div>
+  </div>
+
 </section>
 </main>
 
@@ -442,15 +454,16 @@
     </div>
   </div>
   <div class="footer-copy">
-    Data shown is representative sample data for demonstration purposes.
-    For official accountability data, visit screportcards.com.
+    Data sourced from SC Department of Education Report Card files (2021–2025).
+    For the official interactive report card, visit screportcards.com.
     &copy; 2025 South Carolina Department of Education.
   </div>
 </footer>
 
+<script type="module" src="src/js/app.js"></script>
 <script>
 // ============================================================
-// DATA
+// DATA (legacy mock — replaced by API; kept only for reference)
 // ============================================================
 
 const RATING_COLORS = { A:'#1a7a4a', B:'#0d6e8a', C:'#b07800', D:'#b05010', F:'#9b1c1c' };
@@ -1159,10 +1172,7 @@ function renderDemographics(schoolId) {
   }).join('');
 }
 
-// ============================================================
-// INIT
-// ============================================================
-document.addEventListener('DOMContentLoaded', initHome);
+// Legacy init removed — DOMContentLoaded handled by src/js/app.js module
 </script>
 </body>
 </html>

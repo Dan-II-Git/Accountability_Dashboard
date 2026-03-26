@@ -544,7 +544,7 @@ body {
 
 .rating-history-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--spacing-xs);
 }
 
@@ -562,15 +562,18 @@ body {
 .rating-history-year { color: var(--color-text-muted); }
 
 .rating-history-badge {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: auto;
+  min-width: 28px;
+  height: auto;
+  padding: 3px 7px;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  font-size: 0.62rem;
   font-weight: 800;
   color: #fff;
+  white-space: nowrap;
 }
 
 .rating-waived {
@@ -895,7 +898,7 @@ body {
     grid-template-columns: 1fr;
   }
   .demographics-grid.three-col { grid-template-columns: 1fr 1fr; }
-  .rating-history-grid { grid-template-columns: repeat(3, 1fr); }
+  .rating-history-grid { grid-template-columns: repeat(2, 1fr); }
   .school-header { flex-direction: column; }
   .footer-inner { grid-template-columns: 1fr; }
   .footer-links { text-align: left; }
