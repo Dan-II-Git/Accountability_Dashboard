@@ -13,14 +13,27 @@ const DB   = new Database(
 );
 
 // ── Lookup tables ─────────────────────────────────────────────────────────────
+// Background colors for each rating level (used for Chart.js dataset colors)
+// Light/warm = strong performance; dark/cool = poor performance
 const RATING_COLORS = {
-  'Excellent':      '#1a7a4a',
-  'Good':           '#0d6e8a',
-  'Average':        '#b07800',
-  'Below Average':  '#b05010',
-  'Unsatisfactory': '#9b1c1c',
-  'Not Rated':      '#9ca3af',
-  '—':              '#9ca3af'
+  'Excellent':      '#f5cc7f',
+  'Good':           '#fff5e0',
+  'Average':        '#e2eaf2',
+  'Below Average':  '#315e72',
+  'Unsatisfactory': '#2f3d4c',
+  'Not Rated':      '#575757',
+  '—':              '#575757'
+};
+
+// Foreground/text colors to pair with each rating background
+const RATING_TEXT_COLORS = {
+  'Excellent':      '#303d4d',
+  'Good':           '#303d4d',
+  'Average':        '#303d4d',
+  'Below Average':  '#fff',
+  'Unsatisfactory': '#fff',
+  'Not Rated':      '#fff',
+  '—':              '#fff'
 };
 
 const SUBGROUP_LABELS = {
@@ -62,7 +75,12 @@ function naturalSort(a, b) {
 
 function formatRating(r) {
   const label = r || '—';
-  return { rate: r, label, color: RATING_COLORS[label] || '#9ca3af' };
+  return {
+    rate:      r,
+    label,
+    color:     RATING_COLORS[label]      || '#575757',
+    textColor: RATING_TEXT_COLORS[label] || '#fff'
+  };
 }
 
 // Use pct_overall (actual 0–100 score) when available; fall back to idx*20 for 2022
@@ -183,6 +201,20 @@ const stmts = {
     WHERE REPLACE(s.district_name, CHAR(10), ' ') = ?
       AND s.is_active = 1 AND s.school_type != 'D'
     GROUP BY ce.year ORDER BY ce.year
+  `),
+
+  // Cross-district school name search (max 25 results)
+  schoolSearch: DB.prepare(`
+    SELECT s.school_id, s.school_name, s.school_type, s.grade_span,
+           REPLACE(s.district_name, CHAR(10), ' ') AS district_name,
+           r.rate_overall, r.indx_overall
+    FROM schools s
+    LEFT JOIN ratings r ON r.school_id = s.school_id
+      AND r.year = (SELECT MAX(year) FROM ratings WHERE school_id = s.school_id)
+    WHERE s.is_active = 1 AND s.school_type != 'D'
+      AND s.school_name LIKE ? ESCAPE '\\'
+    ORDER BY s.school_name
+    LIMIT 25
   `)
 };
 
@@ -236,6 +268,22 @@ app.get('/api/districts/:name/trend', (req, res) => {
     ratings:     bySchool[s.school_id] || []
   }));
   res.json(result);
+});
+
+// GET /api/schools/search?q=... — cross-district school name search
+app.get('/api/schools/search', (req, res) => {
+  const q = (req.query.q || '').trim();
+  if (q.length < 2) return res.json([]);
+  const rows = stmts.schoolSearch.all(`%${q}%`);
+  res.json(rows.map(r => ({
+    school_id:     r.school_id,
+    school_name:   r.school_name,
+    school_type:   r.school_type,
+    grade_span:    r.grade_span,
+    district_name: r.district_name,
+    rating:        formatRating(r.rate_overall),
+    indx_overall:  r.indx_overall
+  })));
 });
 
 // GET /api/schools/:id

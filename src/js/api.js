@@ -60,3 +60,8 @@ export function fetchClassroom(schoolId) {
 export function fetchDistrictClassroom(districtName) {
   return get(`/api/districts/${encodeURIComponent(districtName)}/classroom`);
 }
+
+// Returns up to 25 schools matching the query across all districts
+export function fetchSchoolSearch(q) {
+  return get(`/api/schools/search?q=${encodeURIComponent(q)}`);
+}

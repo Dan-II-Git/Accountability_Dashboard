@@ -3,14 +3,15 @@
 // Data is passed as parameters (fetched from API in app.js)
 // ============================================================
 
+// Light/warm = strong performance; dark/cool = poor performance
 export const RATING_COLORS = {
-  'Excellent':      '#1a7a4a',
-  'Good':           '#0d6e8a',
-  'Average':        '#b07800',
-  'Below Average':  '#b05010',
-  'Unsatisfactory': '#9b1c1c',
-  'Not Rated':      '#9ca3af',
-  '—':              '#9ca3af'
+  'Excellent':      '#f5cc7f',
+  'Good':           '#fff5e0',
+  'Average':        '#e2eaf2',
+  'Below Average':  '#315e72',
+  'Unsatisfactory': '#2f3d4c',
+  'Not Rated':      '#575757',
+  '—':              '#575757'
 };
 
 const BAND_COLORS = {
@@ -133,7 +134,7 @@ function renderRatingHistoryGrid(ratings) {
     </div>`;
     return `<div class="rating-history-item" title="${r.overall?.rate || ''} — Score: ${r.score ?? '—'}">
       <span class="rating-history-year">${yr}</span>
-      <div class="rating-history-badge" style="background:${r.overall?.color || '#9ca3af'}">${r.overall?.label || '—'}</div>
+      <div class="rating-history-badge rating-${r.indx_overall || 0}">${r.overall?.label || '—'}</div>
       <span style="font-size:0.68rem;color:var(--color-text-muted)">${r.score ?? '—'}</span>
     </div>`;
   }).join('');

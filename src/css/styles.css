@@ -572,9 +572,16 @@ body {
   justify-content: center;
   font-size: 0.62rem;
   font-weight: 800;
-  color: #fff;
   white-space: nowrap;
 }
+
+/* ── Rating level classes (matches DB indx_overall: 5=Excellent … 1=Unsatisfactory) ─── */
+.rating-5 { background-color: #f5cc7f !important; color: #303d4d !important; }  /* Excellent */
+.rating-4 { background-color: #fff5e0 !important; color: #303d4d !important; }  /* Good */
+.rating-3 { background-color: #e2eaf2 !important; color: #303d4d !important; }  /* Average */
+.rating-2 { background-color: #315e72 !important; color: #fff !important; }     /* Below Average */
+.rating-1 { background-color: #2f3d4c !important; color: #fff !important; }     /* Unsatisfactory */
+.rating-0, .rating-9 { background-color: #575757 !important; color: #fff !important; } /* Not Rated */
 
 .rating-waived {
   font-size: 0.65rem;

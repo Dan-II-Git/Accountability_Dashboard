@@ -6,3 +6,7 @@ node_modules/
 
 # Logs
 *.log
+
+# SQLite WAL/shared-memory files (transient, not needed in repo)
+*.db-shm
+*.db-wal

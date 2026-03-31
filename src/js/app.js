@@ -10,7 +10,8 @@ import {
   fetchSchool,
   fetchAchievement,
   fetchDemographics,
-  fetchClassroom
+  fetchClassroom,
+  fetchSchoolSearch
 } from './api.js';
 
 import {
@@ -171,14 +172,14 @@ async function openDistrict(districtName) {
 
     $('dist-school-cards').innerHTML = schools.map(school => {
       const r     = school.latest_rating;
-      const color = r?.overall?.color || '#9ca3af';
+      const indx  = r?.indx_overall || 0;
       const short = r?.overall?.label || '—';
       return `
         <div class="dist-card" tabindex="0"
              onclick="openSchool('${school.school_id}')"
              onkeydown="if(event.key==='Enter')openSchool('${school.school_id}')">
           <div class="dc-hdr">
-            <div class="dc-grade" style="background:${color}">${short}</div>
+            <div class="dc-grade rating-${indx}">${short}</div>
             <div>
               <div class="dc-name">${school.school_name}</div>
               <div class="dc-meta">
@@ -190,7 +191,7 @@ async function openDistrict(districtName) {
           ${r ? `<div class="dc-stats">
             <div><span class="dc-stat-val">${r.score ?? '—'}</span><span class="dc-stat-lbl">Score</span></div>
             <div><span class="dc-stat-val">${r.enrollment?.toLocaleString() || '—'}</span><span class="dc-stat-lbl">Enrolled</span></div>
-            <div><span class="dc-stat-val" style="color:${color}">${r.overall?.rate || '—'}</span><span class="dc-stat-lbl">${r.year}</span></div>
+            <div><span class="dc-stat-val">${r.overall?.rate || '—'}</span><span class="dc-stat-lbl">${r.year}</span></div>
           </div>` : ''}
         </div>`;
     }).join('');
@@ -216,7 +217,6 @@ async function openSchool(schoolId) {
     state.achievementSubject = defaultSubject(school.school_type);
 
     const latest = school.latest_rating;
-    const color  = latest?.overall?.color || '#003366';
     const county = school.district_name.replace(/School District.*/i, '').replace(/County/i, '').trim();
 
     // Breadcrumb
@@ -236,8 +236,8 @@ async function openSchool(schoolId) {
 
     const circle = $('school-grade-circle');
     if (circle && latest) {
-      circle.style.background = color;
-      circle.textContent      = latest.overall?.label || '—';
+      circle.className   = `grade-circle rating-${latest.indx_overall || 0}`;
+      circle.textContent = latest.overall?.label || '—';
     }
     const gradeYear = $('school-grade-year');
     if (gradeYear && latest) gradeYear.textContent = `${latest.year} Rating`;
@@ -393,10 +393,59 @@ window.app = {
   openSchool(schoolId)   { openSchool(schoolId); }
 };
 
+// ─── Cross-district school name search ────────────────────────────────────────
+function wireSchoolNameSearch() {
+  const input    = $('school-name-search');
+  const dropdown = $('school-name-dropdown');
+  if (!input || !dropdown) return;
+
+  let debounce;
+
+  input.addEventListener('input', () => {
+    clearTimeout(debounce);
+    const q = input.value.trim();
+    if (q.length < 2) { dropdown.style.display = 'none'; return; }
+
+    debounce = setTimeout(async () => {
+      try {
+        const results = await fetchSchoolSearch(q);
+        if (!results.length) {
+          dropdown.innerHTML = '<div class="snd-empty">No schools found.</div>';
+          dropdown.style.display = 'block';
+          return;
+        }
+        dropdown.innerHTML = results.map(s => `
+          <div class="snd-item" tabindex="0" data-id="${s.school_id}">
+            <span class="snd-badge rating-${s.indx_overall || 0}">${s.rating?.label || '—'}</span>
+            <div class="snd-info">
+              <div class="snd-name">${s.school_name}</div>
+              <div class="snd-meta">${s.district_name} · ${typeLabel(s.school_type)}</div>
+            </div>
+          </div>`).join('');
+        dropdown.style.display = 'block';
+
+        dropdown.querySelectorAll('.snd-item').forEach(el => {
+          const go = () => { dropdown.style.display = 'none'; input.value = ''; openSchool(el.dataset.id); };
+          el.addEventListener('click', go);
+          el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+        });
+      } catch (e) { console.error(e); }
+    }, 250);
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', e => {
+    if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.style.display = 'none';
+    }
+  });
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
   showHome();
   await renderHomeSearchPanel();
+  wireSchoolNameSearch();
 
   // Wire up district select (the HTML onchange calls onDistrictChange — define it globally)
   window.onDistrictChange = async (encoded) => {

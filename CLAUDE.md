@@ -82,16 +82,23 @@ All district-scoped queries must include `AND s.is_active = 1 AND s.school_type 
 
 SC DOE uses five rating levels. **Always use full names — never abbreviations.**
 
-| Full Name | Color |
-|---|---|
-| Excellent | `#1a7a4a` |
-| Good | `#0d6e8a` |
-| Average | `#b07800` |
-| Below Average | `#b05010` |
-| Unsatisfactory | `#9b1c1c` |
-| Not Rated / — | `#9ca3af` |
+| Full Name | `indx_overall` | CSS Class | Background | Text |
+|---|---|---|---|---|
+| Excellent | 5 | `.rating-5` | `#f5cc7f` | `#303d4d` |
+| Good | 4 | `.rating-4` | `#fff5e0` | `#303d4d` |
+| Average | 3 | `.rating-3` | `#e2eaf2` | `#303d4d` |
+| Below Average | 2 | `.rating-2` | `#315e72` | `#fff` |
+| Unsatisfactory | 1 | `.rating-1` | `#2f3d4c` | `#fff` |
+| Not Rated | 0 or 9 | `.rating-0` / `.rating-9` | `#575757` | `#fff` |
 
-The `formatRating` function in `server.js` returns `{ rate, label, color }`. The `label` field is the full name. On the frontend, always reference `rating.overall.label` — never `.short` (that field was removed).
+**Design intent:** Light/warm tones for strong performance (gold → cream → light blue); dark cool tones for poor performance (teal → navy). This is intentionally reversed from a traffic-light convention — dark signals concern, light signals success.
+
+**Important:** The DB `indx_overall` scale runs 5 (best) → 1 (worst), the opposite of intuition. CSS class numbers directly mirror `indx_overall` — `rating-${indx_overall}` always produces the correct class.
+
+**Color application rules:**
+- Badge/pill elements (`.grade-circle`, `.dc-grade`, `.rating-history-badge`) must use the CSS class `rating-${indx_overall}` — never inline `style="background:..."`. The class handles both background and text color automatically.
+- Chart.js dataset colors (point backgrounds, bar fills) still read `RATING_COLORS` directly from `charts.js`, which holds the same background hex values.
+- `formatRating` in `server.js` returns `{ rate, label, color, textColor }`. `color` is the background hex; `textColor` is the matching foreground hex. The `label` field is the full name. On the frontend, always reference `rating.overall.label` — never `.short` (that field was removed).
 
 **Rating years:** 2022, 2023, 2024, 2025. Four years total. There is no 2021 rating (data exists for classroom/environment going back to 2021, but accountability ratings start at 2022).
 

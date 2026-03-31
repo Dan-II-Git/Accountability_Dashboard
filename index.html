@@ -55,6 +55,7 @@
     .site-header { background: var(--color-primary); color: #fff; position: sticky; top: 0; z-index: 100; box-shadow: var(--sh-md); border-bottom: 3px solid var(--color-gold); }
     .header-inner { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; height: 64px; display: flex; align-items: center; gap: 16px; }
     .header-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; cursor: pointer; }
+    .header-logo-img { height: 40px; width: auto; background: #fff; border-radius: 4px; padding: 3px 8px; flex-shrink: 0; }
     .header-logo svg { width: 38px; height: 38px; flex-shrink: 0; }
     .header-title-main { font-size: 1.05rem; font-weight: 700; line-height: 1.2; }
     .header-title-sub  { font-size: 0.7rem; opacity: .8; letter-spacing: .04em; text-transform: uppercase; }
@@ -75,6 +76,18 @@
     /* ── Search Card ── */
     .search-card { background: #fff; border-radius: var(--r-lg); box-shadow: var(--sh-lg); padding: 32px; width: 100%; max-width: 640px; }
     .search-card-title { font-size: 1.05rem; font-weight: 700; color: var(--color-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .search-divider { display: flex; align-items: center; gap: 10px; color: var(--color-text-muted); font-size: .8rem; margin: 16px 0; }
+    .search-divider::before, .search-divider::after { content:''; flex:1; border-top: 1px solid var(--color-surface-dark); }
+    .school-name-wrap { position: relative; }
+    .school-name-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid var(--color-surface-dark); border-radius: 10px; box-shadow: var(--sh-lg); z-index: 200; max-height: 320px; overflow-y: auto; }
+    .snd-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--color-surface-dark); }
+    .snd-item:last-child { border-bottom: none; }
+    .snd-item:hover, .snd-item:focus { background: var(--color-surface-alt); outline: none; }
+    .snd-badge { font-size: .65rem; font-weight: 800; padding: 3px 7px; border-radius: 5px; white-space: nowrap; flex-shrink: 0; }
+    .snd-info { min-width: 0; }
+    .snd-name { font-weight: 600; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .snd-meta { font-size: .75rem; color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .snd-empty { padding: 12px 14px; color: var(--color-text-muted); font-size: .85rem; }
     .form-lbl { display: block; font-size: .82rem; font-weight: 600; color: var(--color-text-sec); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
     .form-group { margin-bottom: 14px; }
     .form-select, .form-input {
@@ -129,9 +142,10 @@
     .dash-card { background: #fff; border-radius: var(--r-lg); padding: 28px; margin-bottom: 24px; box-shadow: var(--sh-sm); border: 1px solid var(--color-border); }
     .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid var(--color-surface-alt); }
     .card-icon { width: 36px; height: 36px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .ci-blue   { background: #dbeafe; color: #1e40af; }
-    .ci-teal   { background: #ccf2f5; color: #005c66; }
-    .ci-green  { background: #d1fae5; color: #065f46; }
+    /* Single SCDE brand palette: gold tint bg + primary dark icon */
+    .ci-blue,
+    .ci-teal,
+    .ci-green  { background: rgba(241,186,85,.18); color: #2f3d4c; }
     .card-title    { font-size: 1.1rem; font-weight: 700; }
     .card-subtitle { font-size: .8rem; color: var(--color-text-muted); margin-top: 1px; }
     .card-controls { margin-left: auto; display: flex; gap: 10px; align-items: center; }
@@ -206,6 +220,15 @@
     .dc-stat-val { display: block; font-size: 1.05rem; font-weight: 800; }
     .dc-stat-lbl { font-size: .68rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .03em; }
 
+    /* ── Rating level classes (DB indx_overall: 5=Excellent … 1=Unsatisfactory)
+          Light/warm = strong performance; dark/cool = poor performance ── */
+    .rating-5 { background-color: #f5cc7f !important; color: #303d4d !important; }  /* Excellent */
+    .rating-4 { background-color: #fff5e0 !important; color: #303d4d !important; }  /* Good */
+    .rating-3 { background-color: #e2eaf2 !important; color: #303d4d !important; }  /* Average */
+    .rating-2 { background-color: #315e72 !important; color: #fff !important; }     /* Below Average */
+    .rating-1 { background-color: #2f3d4c !important; color: #fff !important; }     /* Unsatisfactory */
+    .rating-0, .rating-9 { background-color: #575757 !important; color: #fff !important; } /* Not Rated */
+
     /* ── Footer ── */
     .site-footer { background: var(--color-primary); color: rgba(255,255,255,.75); padding: 32px 24px; margin-top: 48px; }
     .footer-inner { max-width: var(--max-w); margin: 0 auto; display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: center; }
@@ -245,19 +268,12 @@
 <header class="site-header">
   <div class="header-inner">
     <div class="header-logo" onclick="goHome()" tabindex="0" role="link" aria-label="SC School Data home">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <circle cx="50" cy="50" r="48" fill="#234058" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
-        <path d="M 38 22 Q 20 50 38 78 Q 55 60 55 50 Q 55 40 38 22 Z" fill="rgba(255,255,255,.9)"/>
-        <rect x="47" y="56" width="6" height="22" rx="3" fill="rgba(255,255,255,.9)"/>
-        <ellipse cx="50" cy="50" rx="13" ry="9" fill="rgba(255,255,255,.9)" transform="rotate(-30,50,50)"/>
-        <ellipse cx="50" cy="50" rx="13" ry="9" fill="rgba(255,255,255,.9)" transform="rotate(30,50,50)"/>
-        <ellipse cx="50" cy="50" rx="13" ry="9" fill="rgba(255,255,255,.9)" transform="rotate(-80,50,50)"/>
-        <ellipse cx="50" cy="50" rx="13" ry="9" fill="rgba(255,255,255,.9)" transform="rotate(80,50,50)"/>
-        <circle cx="50" cy="50" r="5" fill="rgba(255,255,255,.9)"/>
-      </svg>
-      <div>
-        <div class="header-title-main">SC School Data</div>
-        <div class="header-title-sub">South Carolina Department of Education</div>
+      <img class="header-logo-img" src="assets/scde_logo.png" alt="South Carolina Department of Education" />
+      <div style="display:flex;align-items:center;gap:0;padding-left:10px;border-left:1px solid rgba(255,255,255,.3)">
+        <div>
+          <div class="header-title-main">School Performance Dashboard</div>
+          <div class="header-title-sub">Accountability Data 2022–2025</div>
+        </div>
       </div>
     </div>
     <nav class="header-nav">
@@ -273,7 +289,8 @@
 <!-- ═══ HOME VIEW ════════════════════════════════════════════════ -->
 <section id="view-home">
   <div class="hero-content">
-    <div class="hero-badge">South Carolina Department of Education</div>
+    <img src="assets/scde_logo.png" alt="South Carolina Department of Education"
+         style="height:clamp(48px,8vw,72px);width:auto;background:#fff;border-radius:8px;padding:6px 16px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.25);" />
     <h1 class="hero-title">School Performance Dashboard</h1>
     <p class="hero-sub">
       Explore accountability ratings, academic achievement, and student demographics
@@ -293,6 +310,13 @@
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
       Find a School or District
     </div>
+    <div class="form-group school-name-wrap">
+      <label class="form-lbl" for="school-name-search">Search by School Name</label>
+      <input class="form-input" id="school-name-search" type="search"
+             placeholder="Start typing any school name…" autocomplete="off" />
+      <div id="school-name-dropdown" class="school-name-dropdown" style="display:none"></div>
+    </div>
+    <div class="search-divider">or browse by district</div>
     <div class="form-group">
       <label class="form-lbl" for="district-select">School District</label>
       <select class="form-select" id="district-select" onchange="onDistrictChange(this.value)">
