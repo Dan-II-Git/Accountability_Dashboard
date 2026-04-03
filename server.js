@@ -13,6 +13,11 @@ const DB   = new Database(
 );
 
 // ── Lookup tables ─────────────────────────────────────────────────────────────
+// Derive indx_overall from label when DB value is null (2022 rows from COMPARE files)
+const LABEL_TO_INDX = {
+  'Excellent': 5, 'Good': 4, 'Average': 3, 'Below Average': 2, 'Unsatisfactory': 1
+};
+
 // Background colors for each rating level (used for Chart.js dataset colors)
 // Light/warm = strong performance; dark/cool = poor performance
 const RATING_COLORS = {
@@ -92,12 +97,13 @@ function toScore(pct, idx) {
 
 function shapeRating(row) {
   if (!row) return null;
+  const indx = row.indx_overall ?? LABEL_TO_INDX[row.rate_overall] ?? null;
   return {
     year:              row.year,
     enrollment:        row.enrollment,
     poverty_index:     row.poverty_index,
-    score:             toScore(row.pct_overall, row.indx_overall),
-    indx_overall:      row.indx_overall,
+    score:             toScore(row.pct_overall, indx),
+    indx_overall:      indx,
     overall:           formatRating(row.rate_overall),
     achieve:           formatRating(row.rate_achieve),
     prep_success:      formatRating(row.rate_prepsuccess),
